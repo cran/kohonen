@@ -19,11 +19,14 @@
   xdists <- ydists <- rep(0, ng)  
 
   starters <- sample(1:nd, ng, replace = FALSE)
-  
   init <- data[starters, , drop = FALSE]
-  codeYs <- matrix(runif(ng*ny), ng, ny)
-  codeYs <- sweep(codeYs, 1, rowSums(codeYs), FUN="/")
   codes <- init
+  if (predict.type == "class") {
+    ## rescale to .25 - .75 in order to make class transitions easier
+    codeYs <- 0.5 + 0.5*(Y[starters,] - 0.5)
+  } else {
+    codeYs <- Y[starters,]
+  }
 
   nhbrdist <- unit.distances(grid, toroidal)
   changes <- rep(0, rlen*2)
