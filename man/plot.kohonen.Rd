@@ -47,7 +47,8 @@ plot.kohonen(x, type = c("changes", "codes", "counts", "mapping",
     (i.e. classes) or continuous in nature. Only relevant for the colour
     keys of plots of supervised networks.}
   \item{bgcol}{optional argument to colour the unit backgrounds for the
-    "mapping" plotting type. Defaults to "gray".}
+    "mapping" and "codes" plotting type. Defaults to "gray" and
+    "transparent" in both types, respectively.}
   \item{\dots}{other graphical parameters, e.g. colours of labels, or
     plotting symbols, in the "mapping" plotting type.}
 }

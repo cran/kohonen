@@ -21,7 +21,7 @@
            palette.name, ncolors, zlim, heatkey, labels, contin, ...),
          property = plot.kohprop(x, property, main,
            palette.name, ncolors, zlim, heatkey, contin, ...),
-         codes = plot.kohcodes(x, main, ...),
+         codes = plot.kohcodes(x, main, bgcol, ...),
          counts = plot.kohcounts(x, classif, main,
            palette.name, ncolors, zlim, heatkey, ...),
          changes = plot.kohchanges(x, main, ...))
@@ -287,7 +287,7 @@ plot.kohcounts <- function(x, classif, main, palette.name, ncolors,
 }
 
 
-plot.kohcodes <- function(x, main, ...)
+plot.kohcodes <- function(x, main, bgcol, ...)
 {
   ifelse(is.null(main),
          par(mar = c(0.6, 0.6, 0.6, 0.6)),
@@ -303,10 +303,11 @@ plot.kohcodes <- function(x, main, ...)
          main, adj = .5, cex = par("cex.main"),
          font = par("font.main"))
   }
-  
+
+  if (is.null(bgcol)) bgcol <- "transparent"
   symbols(x$grid$pts[, 1], x$grid$pts[, 2],
           circles = rep(0.5, nrow(x$grid$pts)), inches = FALSE,
-          add = TRUE, bg = "white")
+          add = TRUE, bg = bgcol)
 
   codes <- sweep(x$codes, 2, apply(x$codes, 2, min))
   nvars <- ncol(codes)
