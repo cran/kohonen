@@ -10,8 +10,9 @@
   and iso-propanol, measured at five different temperatures (30, 40,
   ..., 70 degrees Centigrade). A training set of 65 mixtures (13 spectra
   per temperature) is available, as well as a test set of 30 spectra (5
-  per temperature). Spectra are in variables nirXtrain and nirXtest;
-  concentrations of the three compounds in nirYtrain and nirYtest.}
+  per temperature). Spectra are in variables \code{nirXtrain} and
+  \code{nirXtest}; concentrations of the three compounds in \code{nirYtrain}
+  and \code{nirYtest}.} 
 \references{F. Wülfert , W.Th. Kok, A.K. Smilde: Anal. Chem. 1998, 1761-1767}
 \examples{
   data(nirTshift)
@@ -31,7 +32,7 @@
   plot(nirnet, "predict", main="Prediction of water content")
   ## Plot temperatures as circles
   temps <- rep(seq(30, 70, by=10), times=rep(13,5))
-  symbols(nirnet$grid$pts[nirnet$classif,] +
+  symbols(nirnet$grid$pts[nirnet$unit.classif,] +
           matrix(rnorm(nrow(nirYtr)*2, sd=.1), ncol=2),
 	  circles = (temps - 20)/250,
 	  inches = FALSE, add = TRUE)
@@ -43,7 +44,7 @@
   plot(nirnet2, "predict", palette.name = rainbow,
        main="Prediction of temperatures")
   ## Plot concentrations of water as circles
-  symbols(nirnet2$grid$pts[nirnet2$classif,] +
+  symbols(nirnet2$grid$pts[nirnet2$unit.classif,] +
           matrix(rnorm(nrow(nirYtr)*2, sd=.1), ncol=2),
 	  circles = 0.05 + 0.4 * nirYtr[,2],
 	  inches = FALSE, add = TRUE)

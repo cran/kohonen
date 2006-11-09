@@ -15,7 +15,7 @@ somKmeans <- function(codes, data, max.iter=20, verbose=FALSE)
             res = integer(nd),
             integer(ncodes+1),
             as.integer(ncodes),
-            double(nd),
+            dists = double(nd),
             PACKAGE = "class")
   
   for (i in 1:max.iter) {
@@ -37,7 +37,7 @@ somKmeans <- function(codes, data, max.iter=20, verbose=FALSE)
               res = integer(nd),
               integer(ncodes+1),
               as.integer(ncodes),
-              double(nd),
+              dists = double(nd),
               PACKAGE = "class")
     newclassif <- res$res
 
@@ -51,5 +51,5 @@ somKmeans <- function(codes, data, max.iter=20, verbose=FALSE)
   if (i == max.iter)
     warning("Maximum number of iterations reached in kohonenKmeans")
 
-  list(codes=codes, classif=newclassif, niter=i)
+  list(codes=codes, distances = res$dists, classif=newclassif, niter=i)
 }

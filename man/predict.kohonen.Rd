@@ -9,17 +9,23 @@
   mapped to.
 }
 \usage{
-predict.kohonen(object, ...)
+predict.kohonen(object, newdata, trainX, trainY, unit.predictions,
+                 threshold = 0, ...)
 }
 \arguments{
-  \item{object}{trained network.}
-  \item{\dots}{optional arguments. Two arguments in particular are
-    important: if a \code{data} argument is given (a data matrix with
-    the same number of variables as the codebook vectors of the
-    network), predictions for these objects are returned, both the units
-    at which the objects are mapped and the distance to these units. If
-    a classification vector is given (argument \code{classif}), the
-    distances to the corresponding codebook vectors are calculated.} 
+  \item{object}{Trained network.}
+  \item{newdata}{Data matrix for which predictions are to be made. If
+    not given, defaults to the training data (when available).}
+  \item{trainX}{Training data for obtaining predictions for unsupervised
+    maps; necessary for \code{som} maps trained with the keep.data =
+    FALSE option.}
+  \item{trainY}{Values for the dependent variable for the training data;
+    only necessary for \code{som} maps.}
+  \item{unit.predictions}{Possible override of the predictions for each
+    unit.}
+  \item{threshold}{Used in class predictions; see
+    \code{\link{classmat2classvec}}.}
+  \item{\dots}{Currently not used.} 
 }
 \value{
   Returns a list with components
@@ -31,7 +37,8 @@ predict.kohonen(object, ...)
     codebook vectors.}
 }
 \author{Ron Wehrens}
-\seealso{\code{\link{som}},\code{\link{xyf}},\code{\link{bdk}}}
+\seealso{\code{\link{som}},\code{\link{xyf}},\code{\link{bdk}},
+  \code{\link{map}}}
 \examples{
 ### Simulated example
 library(MASS)

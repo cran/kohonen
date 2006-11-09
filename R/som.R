@@ -34,31 +34,25 @@
   colnames(codes) <- colnames(init)
 
   if (FineTune) {
-    res <- somKmeans(codes, data)
-    codes <- res$codes
-    classif <- res$classif
-    
-    if (keep.data) {
-      return(structure(list(data = data, grid = grid, codes = codes,
-                            changes = changes,
-                            toroidal = toroidal, classif = classif),
-                       class = "kohonen"))
-    } else {
-      return(structure(list(grid = grid, codes = codes, changes = changes,
-                            toroidal = toroidal, classif = classif),
-                       class = "kohonen"))
-    }
+    mapping <- somKmeans(codes, data)
+    mapping$unit.classif <- mapping$classif
+    codes <- mapping$codes
   } else {
-    classif <- predict.kohonen(list(data = data, codes = codes))$unit.classif
+    if (keep.data) {
+      mapping <- map.kohonen(list(codes = codes), newdata = data)
+    }
   }
-    
+
+
   if (keep.data) {
     structure(list(data = data, grid = grid, codes = codes,
-                   changes = changes, toroidal = toroidal, classif = classif),
+                   changes = changes, toroidal = toroidal,
+                   unit.classif = mapping$unit.classif,
+                   distances = mapping$distances, method="som"),
               class = "kohonen")
   } else {
     structure(list(grid = grid, codes = codes, changes = changes,
-                   toroidal = toroidal, classif = classif),
+                   toroidal = toroidal, method="som"),
               class = "kohonen")
   }
 }

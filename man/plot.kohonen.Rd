@@ -18,19 +18,20 @@ plot.kohonen(x, type = c("changes", "codes", "counts", "mapping",
                          "prediction", "property"),
              classif, labels=NULL, pchs=NULL, main=NULL,
              palette.name = heat.colors, ncolors, 
-             zlim=NULL, property, heatkey=TRUE, contin, \dots) 
+             zlim=NULL, property, heatkey=TRUE, contin, bgcol=NULL,
+             \dots) 
 }
 \arguments{
   \item{x}{kohonen object.}
   \item{type}{type of plot. (Wow!)}
   \item{classif}{classification object, as returned by
     \code{predict.kohonen}, or vector of unit numbers.
-    Only needed if \code{type} equals "classifications" and
+    Only needed if \code{type} equals "mapping" and
     "counts".}
   \item{labels}{labels to plot when \code{type} equals
-    "classifications".}
+    "mapping".}
   \item{pchs}{symbols to plot when \code{type} equals
-    "classifications".}
+    "mapping".}
   \item{main}{title of the plot.}
   \item{palette.name}{colors to use as unit background for "codes",
     "counts", "prediction", and "property" plotting types.}
@@ -45,8 +46,10 @@ plot.kohonen(x, type = c("changes", "codes", "counts", "mapping",
   \item{contin}{whether or not the data should be seen as discrete
     (i.e. classes) or continuous in nature. Only relevant for the colour
     keys of plots of supervised networks.}
+  \item{bgcol}{optional argument to colour the unit backgrounds for the
+    "mapping" plotting type. Defaults to "gray".}
   \item{\dots}{other graphical parameters, e.g. colours of labels, or
-    plotting symbols, in the "classifications" plotting type.}
+    plotting symbols, in the "mapping" plotting type.}
 }
 \details{Several different types of plots are supported:
   \describe{
@@ -84,23 +87,24 @@ plot(kohmap, type="counts", main="counts plot")
 plot(kohmap, type="mapping", 
      labels=wine.classes, col=wine.classes,
      main="mapping plot")
-plot(kohmap, type="mapping", 
-     pchs=wine.classes, col=wine.classes,
+xyfpredictions <- predict(kohmap, newdata=kohmap$codes)$classif
+bgcols <- c("gray", "pink", "lightgreen")
+plot(kohmap, type="mapping", col=wine.classes,
+     pchs=wine.classes, bgcol=bgcols[as.integer(xyfpredictions)], 
      main="another mapping plot")
 
-### Made-up labels :-)
 plot(kohmap, type="prediction",
-     labels=c("Chianti", "Barolo", "Montepulciano"),
+     labels=paste("Variety", 1:3),
      palette.name = rainbow,
      main="unit class prediction", cex=.8)
 
-### Plot mean similarity of mapped objects to their unit codebook vector
-mapping <- predict(kohmap, classif=kohmap$classif)
-hits <- sort(unique(kohmap$classif))
-similarities <- rep(NA, 25)
+### Plot mean distance of mapped objects to their unit codebook vector
+hits <- sort(unique(kohmap$unit.classif))
+distances <- rep(NA, 25)
 for (i in seq(along=hits))
-  similarities[hits[i]] <- mean(mapping$distances[kohmap$classif == hits[i]])
+  distances[hits[i]] <- mean(kohmap$distances[kohmap$unit.classif == hits[i]])
 
-plot(kohmap, type="property", property=similarities, main="property plot")
+plot(kohmap, type="property", property=distances,
+     main="property plot: mean distances")
 }
 \keyword{classif}

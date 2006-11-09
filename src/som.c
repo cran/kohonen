@@ -7,9 +7,9 @@
 /* SOM function for the kohonen package, modelled after BDR's function
    in the class package. */
 
-SOM_online(double *data, double *codes, double *nhbrdist,
-	   double *alphas, double *pradius, double *changes,
-	   Sint *pn, Sint *pp, Sint *pncodes, Sint *prlen)
+void SOM_online(double *data, double *codes, double *nhbrdist,
+		double *alphas, double *pradius, double *changes,
+		Sint *pn, Sint *pp, Sint *pncodes, Sint *prlen)
 {
   int n = *pn, p = *pp, ncodes = *pncodes, rlen = *prlen;
   double radius = *pradius;

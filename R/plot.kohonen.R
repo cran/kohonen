@@ -10,19 +10,20 @@
                             main = NULL,
                             palette.name = heat.colors, ncolors,
                             zlim = NULL, property, heatkey = TRUE,
-                            contin, ...)
+                            contin, bgcol=NULL, ...)
 {
   type <- match.arg(type)
 
   switch(type,
-         mapping = plot.kohmapping(x, classif, main, labels, pchs, ...),
-         prediction = plot.kohpred(x, property, main, palette.name, ncolors,
-           zlim, heatkey, labels, contin, ...),
-         property = plot.kohprop(x, property, main, palette.name, ncolors,
-           zlim, heatkey, contin, ...),
+         mapping = plot.kohmapping(x, classif, main,
+           labels, pchs, bgcol, ...),
+         prediction = plot.kohpred(x, property, main,
+           palette.name, ncolors, zlim, heatkey, labels, contin, ...),
+         property = plot.kohprop(x, property, main,
+           palette.name, ncolors, zlim, heatkey, contin, ...),
          codes = plot.kohcodes(x, main, ...),
-         counts = plot.kohcounts(x, classif, main, palette.name, ncolors,
-           zlim, heatkey, ...),
+         counts = plot.kohcounts(x, classif, main,
+           palette.name, ncolors, zlim, heatkey, ...),
          changes = plot.kohchanges(x, main, ...))
 
   invisible()
@@ -114,24 +115,26 @@ plot.kohpred <- function(x, Y, main, palette.name, ncolors, zlim, heatkey,
           bg = bgcol[as.integer(cut(as.numeric(Y), seq(zlim[1], zlim[2],
             length = ncolors + 1), include.lowest = TRUE))])
   
- 
+  if (is.null(labels))
+    labels <- levels(Y)
+  
   if (heatkey) {
     plot.heatkey(x, zlim, bgcol, labels, contin = contin, ...)
   }
 }
 
 
-plot.kohmapping <- function(x, classif, main, labels, pchs, ...)
+plot.kohmapping <- function(x, classif, main, labels, pchs, bgcol, ...)
 {
   ifelse(is.null(main),
          par(mar = c(0.6, 0.6, 0.6, 0.6)),
          par(mar = c(0.6, 0.6, 2.6, 0.6)))
     
-  if (missing(classif) & !is.null(x$classif)) {
-    classif <- x$classif
+  if (missing(classif) & !is.null(x$unit.classif)) {
+    classif <- x$unit.classif
   } else {
-    if (!is.null(classif$classif))
-      classif <- classif$classif
+    if (!is.null(classif$unit.classif))
+      classif <- classif$unit.classif
   }
   
   plot(x$grid, ...)
@@ -144,10 +147,11 @@ plot.kohmapping <- function(x, classif, main, labels, pchs, ...)
          main, adj = .5, cex = par("cex.main"),
          font = par("font.main"))
   }
-  
+
+  if (is.null(bgcol)) bgcol <- "gray"
   symbols(x$grid$pts[, 1], x$grid$pts[, 2],
           circles = rep(0.5, nrow(x$grid$pts)),
-          inches = FALSE, add = TRUE, bg = "gray")
+          inches = FALSE, add = TRUE, bg = bgcol)
   if (is.null(labels) & !is.null(pchs))
     points(x$grid$pts[classif, 1] + rnorm(length(classif), 0, 0.12),
            x$grid$pts[classif, 2] + rnorm(length(classif), 0, 0.12),
@@ -222,7 +226,7 @@ plot.kohchanges <- function(x, main, ...)
     ticks <- pretty(x$changes[,2], length(axTicks(2)))
     
     matplot(huhn, type = "l", lty = 1, col=c(1,2), main = main, 
-            ylab = "Mean change", xlab = "Iteration", ...)
+            ylab = "Mean similarity change", xlab = "Iteration", ...)
     axis(4, col.axis=2, at=ticks * max(x$changes[,1]) / max(x$changes[,2]),
          labels=ticks)
     legend("topright", legend = c("X update", "Y update"),
@@ -243,11 +247,11 @@ plot.kohcounts <- function(x, classif, main, palette.name, ncolors,
     margins[3] <- margins[3] + 2
   par(mar = margins)
 
-  if (missing(classif) & !is.null(x$classif)) {
-    classif <- x$classif
+  if (missing(classif) & !is.null(x$unit.classif)) {
+    classif <- x$unit.classif
   } else {
-    if (!is.null(classif$classif))
-      classif <- classif$classif
+    if (!is.null(classif$unit.classif))
+      classif <- classif$unit.classif
   }
   
   plot(x$grid, ...)
@@ -355,7 +359,7 @@ plot.heatkey <- function (x, zlim, bgcol, labels, contin, ...)
     
     text(xleft[2] - 1.3 * diff(xleft),
          yleft[-1] - 0.5*diff(yleft[1:2]),
-         labels,
+         sort(labels),
          xpd = TRUE, adj=1, cex=cex)
   }
 }

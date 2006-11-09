@@ -41,10 +41,11 @@ som(data, grid=somgrid(), rlen = 100, alpha = c(0.05, 0.01),
   \item{classif}{winning units for all data objects.}
   \item{toroidal}{whether a toroidal map is used.}
   \item{data}{data matrix, only if \code{keep.data} is TRUE.}
+  \item{type}{the type of som, here "som"}
 }
 
 \references{W.J. Melssen, R. Wehrens, and L.M.C. Buydens.
-Chemom. Intell. Lab. Syst., in press.}
+Chemom. Intell. Lab. Syst., 83, 99-113 (2006)..}
 \author{Ron Wehrens}
 
 \seealso{\code{\link{xyf}}, \code{\link{bdk}}, \code{\link{plot.kohonen}}}
@@ -54,24 +55,16 @@ set.seed(7)
 
 training <- sample(length(wine.classes), 120)
 Xtraining <- scale(wines[training,])
-som.wines <- som(Xtraining, grid = somgrid(5, 5, "hexagonal"), rlen=100)
+som.wines <- som(Xtraining, grid = somgrid(5, 5, "hexagonal"))
 
 Xtest <- scale(wines[-training,],
                center = attr(Xtraining, "scaled:center"),
                scale = attr(Xtraining, "scaled:scale"))
-som.classes <- rep(0, 25)
-for (i in 1:25) {
-  mappedHere <- which(som.wines$classif == i)
-  if (length(mappedHere) > 0) {
-    classes.mappedHere <- wine.classes[training[mappedHere]]
-    som.classes[i] <-
-      names(table(classes.mappedHere))[table(classes.mappedHere) ==
-                                       max(table(classes.mappedHere))][1]
-  }
-}
 
-som.prediction <- predict(som.wines, data=Xtest)
-somclass.prediction <- som.classes[som.prediction$unit.classif]
-table(wine.classes[-training], somclass.prediction)
+som.prediction <-
+  predict(som.wines, newdata = Xtest,
+          trainX = Xtraining,
+          trainY = classvec2classmat(wine.classes[training]))
+table(wine.classes[-training], som.prediction$classif)
 }
 \keyword{classif}

@@ -78,17 +78,19 @@
   dim(codeYs) <- c(ng, ny)
   colnames(codeYs) <- colnames(Y)
 
-  classif <- predict.kohonen(list(data = data, codes = codes))$unit.classif
-
   if (keep.data) {
+    mapping <- map.kohonen(list(codes = codes), newdata = data)
+    
     structure(list(data = data, Y = Y, predict.type = predict.type,
                    grid = grid, codes = codes, codeYs = codeYs,
-                   changes = changes, toroidal = toroidal, classif = classif),
+                   changes = changes, toroidal = toroidal,
+                   unit.classif = mapping$unit.classif,
+                   distances = mapping$distances, method="bdk"),
               class = "kohonen")
   } else {
     structure(list(predict.type = predict.type,
                    grid = grid, codes = codes, codeYs = codeYs,
-                   changes = changes, toroidal = toroidal, classif = classif),
+                   changes = changes, toroidal = toroidal, method="bdk"),
               class = "kohonen")
   }
 }
