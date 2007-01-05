@@ -1,8 +1,7 @@
-"som" <- function (data, grid = somgrid(), rlen = 100,
-                   alpha = c(0.05, 0.01),
+"som" <- function (data, grid = somgrid(),
+                   rlen = 100, alpha = c(0.05, 0.01),
                    radius = quantile(nhbrdist, 0.67),
-                   init, toroidal = FALSE,
-                   FineTune = TRUE, keep.data = TRUE)
+                   init, toroidal = FALSE, keep.data = TRUE)
 {
   data <- as.matrix(data)
   nd <- nrow(data)
@@ -28,30 +27,21 @@
             rlen = as.integer(rlen),
             PACKAGE = "kohonen")
 
-  changes <- res$changes
+  changes <- matrix(res$changes, ncol=1)
   codes <- res$codes
   dim(codes) <- dim(init)
   colnames(codes) <- colnames(init)
 
-  if (FineTune) {
-    mapping <- somKmeans(codes, data)
-    mapping$unit.classif <- mapping$classif
-    codes <- mapping$codes
-  } else {
-    if (keep.data) {
-      mapping <- map.kohonen(list(codes = codes), newdata = data)
-    }
-  }
-
-
   if (keep.data) {
+    mapping <- map.kohonen(list(codes = codes), newdata = data)
+    
     structure(list(data = data, grid = grid, codes = codes,
                    changes = changes, toroidal = toroidal,
                    unit.classif = mapping$unit.classif,
                    distances = mapping$distances, method="som"),
               class = "kohonen")
   } else {
-    structure(list(grid = grid, codes = codes, changes = changes,
+    structure(list(grid = grid, codes = codes, changes = changes, 
                    toroidal = toroidal, method="som"),
               class = "kohonen")
   }

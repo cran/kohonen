@@ -7,13 +7,16 @@
   fused SOMs. One vector for each object is created by concatenating X
   and Y, and a SOM is trained in the usual way, with one exception: the
   distance of an object to a unit is the sum of separate distances for X
-  and Y spaces. Prediction is done only using the X-space.
+  and Y spaces. Prediction is done only using the X-space. For
+  continuous Y, the Euclidean distance is used; for categorical Y the
+  Tanimoto distance.
 }
 
 \usage{
 xyf(data, Y, grid=somgrid(), rlen = 100, alpha = c(0.05, 0.01),
     radius = quantile(nhbrdist, 0.67), 
-    xweight = 0.5, toroidal = FALSE, keep.data = TRUE)
+    xweight = 0.5, contin = !(all(rowSums(Y) == 1)),
+    toroidal = FALSE, keep.data = TRUE)
 }
 
 \arguments{
@@ -34,6 +37,9 @@ xyf(data, Y, grid=somgrid(), rlen = 100, alpha = c(0.05, 0.01),
     reaches the value of 1 after one-third of the iterations.}
   \item{xweight}{the weight given to the X map in the
     calculation of distances for updating Y. Default is 0.5.}
+  \item{contin}{parameter indicating whether Y is continuous or
+    categorical. The default is to check whether all row sums of Y equal
+    1: in that case \code{contin} is \code{FALSE}.}
   \item{toroidal}{if TRUE, the edges of the map are joined. Note
     that in a hexagonal toroidal map, the number of rows must be even.}
   \item{keep.data}{save data in return value.}
@@ -41,14 +47,22 @@ xyf(data, Y, grid=somgrid(), rlen = 100, alpha = c(0.05, 0.01),
 
 \value{
   an object of class "kohonen" with components
+ \item{data}{data matrix, only returned if \code{keep.data == TRUE}.}
+  \item{Y}{Y, only returned if \code{keep.data == TRUE}.}
+  \item{contin}{parameter indicating whether Y is continuous or
+    categorical.}
   \item{grid}{the grid, an object of class "somgrid".}
-  \item{changes}{vector of mean average deviations from code vectors}
-  \item{codes}{a matrix of code vectors.}
-  \item{codeYs}{a matrix of Y values associated with each unit.}
+  \item{codes}{list of two matrices, containing codebook vectors for X
+    and Y, respectively.}
+  \item{changes}{matrix containing two columns of mean average
+    deviations from code vectors. Column 1 contains deviations used for
+    updating Y; column 2 for updating X.}
   \item{toroidal}{whether a toroidal map is used.}
-  \item{data}{data matrix, only if \code{keep.data} is TRUE.}
-  \item{Y}{Y, only if \code{keep.data} is TRUE.}
-  \item{type}{the type of som, here "xyf"}
+  \item{unit.classif}{winning units for all data objects,
+    only returned if \code{keep.data == TRUE}.}
+  \item{distances}{distances of objects to their corresponding winning
+    unit, only returned if \code{keep.data == TRUE}.}
+   \item{method}{the type of som, here "xyf".}
 }
 
 \references{W.J. Melssen, R. Wehrens, and L.M.C. Buydens.
@@ -61,7 +75,7 @@ Chemom. Intell. Lab. Syst., 83, 99-113 (2006).}
 ### Simulated example
 library(MASS)
 
-csize <- 150
+csize <- 15
 c1 <- mvrnorm(csize, mu=c(5,3,4),
               Sigma=matrix(c(2, 0,0,0, 2, 1, 0, 1, 2),3,3))
 c2 <- mvrnorm(csize, mu=c(5.5, 3.5, 4.5),
@@ -73,22 +87,24 @@ X <- rbind(c1, c2, c3)
 classes <- c(rep(1, csize), rep(2, csize), rep(3, csize))
 
 xyfmap <- xyf(X, classvec2classmat(classes), somgrid(4, 4, "hexagonal"))
-plot(xyfmap, "prediction", palette=rainbow)
+plot(xyfmap, "mapping", pch=rep(1:3, rep(15, 3)), col=rep(1:3, rep(15, 3)))
 
 ### Wine example
 data(wines)
 set.seed(7)
 
-training <- sample(length(wine.classes), 120)
+training <- sample(nrow(wines), 120)
 Xtraining <- scale(wines[training,])
-xyf.wines <- xyf(Xtraining, classvec2classmat(wine.classes[training]),
-                 grid = somgrid(5, 5, "hexagonal"))
 Xtest <- scale(wines[-training,],
                center = attr(Xtraining, "scaled:center"),
                scale = attr(Xtraining, "scaled:scale"))
 
+xyf.wines <- xyf(Xtraining,
+                 classvec2classmat(wine.classes[training]),
+                 grid = somgrid(5, 5, "hexagonal"))
+
 xyf.prediction <- predict(xyf.wines, newdata=Xtest)
-table(wine.classes[-training], xyf.prediction$classif)
+table(wine.classes[-training], xyf.prediction$prediction)
 }
 
 \keyword{classif}

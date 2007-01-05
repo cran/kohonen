@@ -28,9 +28,12 @@ void XYF_Eucl(double *data, double *Ys,
 
   niter = rlen * n;
   for (k = 0; k < niter; k++) {
-    /* i is a counter over objects in data, cd is a counter over units
-       in the map, and j is a counter over variables */
+    /* select random object */
     i = (int)(n * UNIF);
+    /*    fprintf(stderr, "\nObject %d:", i);
+	  i = k % n;
+	  if (i > 3) return; */
+
     dm = DOUBLE_XMAX;
 
     maxx = maxy = 0.0;
@@ -53,6 +56,9 @@ void XYF_Eucl(double *data, double *Ys,
       ydists[cd] = sqrt(ydist); 
       if (ydists[cd] > maxy) maxy = ydists[cd];
     }
+
+    /*    fprintf(stderr, "\nMaximal distances: %.5lf and %.5lf",
+	  maxx, maxy); */
     
     /* scale x and y distances so that largest value in both cases is
        1, and sum to take total distance. Find smallest distance. */ 
@@ -66,16 +72,20 @@ void XYF_Eucl(double *data, double *Ys,
  	nearest = cd;
       }
     }
-    
+
+    /*    fprintf(stderr, "\nWinning unit %d and distance %.5lf",
+	  nearest, dist); */
+
     /* linear decays for radius and learning parameter */
     threshold = *radius - 
-      (*radius - 1.0) * (3.0 * (double) k / (double) niter);
+      (*radius - 1.0) * 3.0 * (double) k / (double) niter;
     if (threshold < 1.0) threshold = 0.5;
 
     alpha = alphas[0] - (alphas[0] - alphas[1]) * (double)k/(double)niter;
 
     l = (int)(k/n);
 
+    /*    fprintf(stderr, "\nAbsolute differences: "); */
     for (cd = 0; cd < ncodes; cd++) {
       if(nhbrdist[cd + ncodes*nearest] > threshold) continue;
 
@@ -85,6 +95,8 @@ void XYF_Eucl(double *data, double *Ys,
 
 	if (cd == nearest) changes[l] += tmp * tmp;
       }
+      
+      /*      if (cd == nearest) fprintf(stderr, " -- "); */
 
       for(j = 0; j < py; j++) {
 	tmp = Ys[i + j*n] - codeYs[cd + j*ncodes];

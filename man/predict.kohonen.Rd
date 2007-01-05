@@ -1,61 +1,64 @@
 \name{predict.kohonen}
 \alias{predict.kohonen}
-\title{Classify using a trained Kohonen map}
+\title{Predict properties using a trained Kohonen map}
 \description{
-  Map objects to a trained Kohonen map. The map may be obtained by
-  supervised methods (\code{xyf}, \code{bdk}), but only the X-space is
-  considered in prediction. If the classification is already known, the
-  function returns the similarity for each object to the unit it is
-  mapped to.
+  Map objects to a trained Kohonen map, and return for each object the
+  property associated with the corresponding winning unit. For
+  \code{som} and \code{supersom} maps, the unit properties are
+  calculated using explicit arguments \code{trainX} and \code{trainY};
+  for \code{xyf} and \code{bdk} maps, the predicted properties are the
+  Y-codebookvectors. Note that in the latter case only the X-space is
+  used for prediction.
 }
 \usage{
 predict.kohonen(object, newdata, trainX, trainY, unit.predictions,
-                 threshold = 0, ...)
+                 threshold = 0, whatmap = NULL, weights = 1, ...)
 }
 \arguments{
   \item{object}{Trained network.}
   \item{newdata}{Data matrix for which predictions are to be made. If
     not given, defaults to the training data (when available).}
   \item{trainX}{Training data for obtaining predictions for unsupervised
-    maps; necessary for \code{som} maps trained with the keep.data =
-    FALSE option.}
+    maps; necessary for \code{som} maps trained with the
+    \code{keep.data = FALSE} option.}
   \item{trainY}{Values for the dependent variable for the training data;
-    only necessary for \code{som} maps.}
+    necessary for \code{som} and \code{supersom} maps.}
   \item{unit.predictions}{Possible override of the predictions for each
     unit.}
   \item{threshold}{Used in class predictions; see
     \code{\link{classmat2classvec}}.}
+  \item{whatmap}{For \code{supersom} maps: what layers to use in the
+    mapping.}
+  \item{weights}{For \code{supersom} maps: weights of layers uses in the
+    mapping.}
   \item{\dots}{Currently not used.} 
 }
 \value{
   Returns a list with components
+  \item{prediction}{predicted values for the properties of interest.}
   \item{unit.classif}{unit numbers to which objects in the data matrix are
     mapped.}
-  \item{classif}{classes associated with the units (only for the
-    supervised \code{bdk} and \code{xyf} networks).}
-  \item{distances}{similarities, expressed as distances, of objects to
-    codebook vectors.}
+  \item{unit.predictions}{property values associated with map units.}
 }
 \author{Ron Wehrens}
 \seealso{\code{\link{som}},\code{\link{xyf}},\code{\link{bdk}},
-  \code{\link{map}}}
+  \code{\link{supersom}}, \code{\link{map}}}
 \examples{
-### Simulated example
-library(MASS)
+data(wines)
+set.seed(7)
 
-csize <- 15
-c1 <- mvrnorm(csize, mu=c(5,3,4),
-              Sigma=matrix(c(2, 0,0,0, 2, 1, 0, 1, 2),3,3))
-c2 <- mvrnorm(csize, mu=c(5.5, 3.5, 4.5),
-              Sigma=matrix(c(2, 0,0,0, 2, 1, 0, 1, 2),3,3))
-c3 <- mvrnorm(csize, mu=c(0,0,0),
-              Sigma=matrix(c(2, 0,0,0, 2, 1, 0, 1, 2),3,3))
+training <- sample(nrow(wines), 120)
+Xtraining <- scale(wines[training, ])
+Xtest <- scale(wines[-training, ],
+               center = attr(Xtraining, "scaled:center"),
+               scale = attr(Xtraining, "scaled:scale"))
 
-X <- rbind(c1, c2, c3)
-classes <- c(rep(1, csize), rep(2, csize), rep(3, csize))
+som.wines <- som(Xtraining, grid = somgrid(5, 5, "hexagonal"))
 
-bdkmod <- bdk(X, classvec2classmat(classes), somgrid(4, 4, "hexagonal"))
-
-predict(bdkmod)
+som.prediction <- predict(som.wines, newdata = Xtest,
+          trainX = Xtraining,
+          trainY = classvec2classmat(wine.classes[training]))
+table(wine.classes[-training],
+      classmat2classvec(som.prediction$prediction))
 }
 \keyword{classif}

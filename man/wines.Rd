@@ -4,10 +4,14 @@
 \docType{data}
 \title{Wine data}
 \description{
-  These data are the results of a chemical analysis of
+  A data frame containing 177 rows and thirteen columns; object
+  \code{wine.classes} contains the class labels.
+  
+  These data are the results of chemical analyses of
   wines grown in the same region in Italy but derived from three
-  different cultivars. The analysis determined the quantities of 13
-  constituents found in each of the three types of wines.
+  different cultivars. The data contain the quantities of several
+  constituents found in each of the three types of wines, as well as
+  some spectroscopic variables.
 }
 \usage{data(wines)}
 \source{

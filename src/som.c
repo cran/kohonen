@@ -41,7 +41,8 @@ void SOM_online(double *data, double *codes, double *nhbrdist,
     /* update all codes within threshold of 'nearest'. Maximal radius
        at the start, minimal radius equals 1.0; maximal alpha at the
        start, minimal alpha at the end. Linear decrease for both. */
-    threshold = radius - (radius-1.0) * (double)k/(double)niter;
+    threshold = radius - (radius-1.0) * 3.0 * (double)k/(double)niter;
+    if (threshold < 1.0) threshold = 0.5;
     alpha = alphas[0] - (alphas[0] - alphas[1]) * (double)k/(double)niter;
 
     for (cd = 0; cd < ncodes; cd++) {
@@ -58,8 +59,10 @@ void SOM_online(double *data, double *codes, double *nhbrdist,
     }
   }
 
-  for (l = 0; l < rlen; l++)
-    changes[l] /= n*p*p;  /* mean difference per variable per object */
+  for (l = 0; l < rlen; l++) {
+    /* mean difference per variable per object */
+    changes[l] = sqrt(changes[l]/p)/n;  
+  }
 
   RANDOUT;
 }

@@ -13,7 +13,7 @@ unit.distances(grid, toroidal)
     topology is that of a torus.}
 }
 \value{
-  Returns a matrix containing distances.
+  Returns a (symmetrical) matrix containing distances.
 }
 \author{Ron Wehrens}
 \examples{

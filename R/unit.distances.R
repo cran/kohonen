@@ -1,6 +1,5 @@
 ### Calculate distances in a Kohonen map. Crude and
-### slow implementation, but hey. When training a map takes 20 hours,
-### who cares about a few seconds?
+### slow implementation, but hey.
 
 unit.distances <- function(grid, toroidal)
 {
