@@ -14,9 +14,9 @@
 
 \usage{
 bdk(data, Y, grid=somgrid(), rlen = 100, alpha = c(0.05, 0.01),
-    radius = quantile(nhbrdist, 0.67), xweight = 0.75,
+    radius = quantile(nhbrdist, 0.67) * c(1, -1), xweight = 0.75,
     contin = !(all(rowSums(Y) == 1)), 
-    toroidal = FALSE, keep.data = TRUE)
+    toroidal = FALSE, n.hood, keep.data = TRUE)
 }
 
 \arguments{
@@ -32,10 +32,12 @@ bdk(data, Y, grid=somgrid(), rlen = 100, alpha = c(0.05, 0.01),
   \item{alpha}{learning rate, a vector of two numbers indicating the
     amount of change. Default is to decline linearly from 0.05 to 0.01
     over \code{rlen} updates.}
-  \item{radius}{the starting radius of the neighbourhood to be used for
-    each update: the decrease is linear over \code{rlen} updates and
-    reaches the value of 1 after one-third of the iterations. After
-    that, only the winning units are updated.}
+  \item{radius}{the radius of the neighbourhood, either given as a
+    single number or a vector (start, stop). If it is given as a single
+    number the radius will run from the given number to the negative
+    value of that number; as soon as the neighbourhood gets smaller than
+    one only the winning unit will be updated. The default is to start with a
+    value that covers 2/3 of all unit-to-unit distances.}
   \item{xweight}{the initial weight given to the X map in the
     calculation of distances for updating Y, and to the Y map for
     updating X. This will linearly go to 0.5 during training. Defaults
@@ -45,6 +47,9 @@ bdk(data, Y, grid=somgrid(), rlen = 100, alpha = c(0.05, 0.01),
     1: in that case \code{contin} is \code{FALSE}.}
   \item{toroidal}{if \code{TRUE}, the edges of the map are joined. Note
     that in a hexagonal toroidal map, the number of rows must be even.}
+  \item{n.hood}{the shape of the neighbourhood, either "circular" or
+    "square". The latter is the default for rectangular maps, the former
+    for hexagonal maps.}
   \item{keep.data}{save data in return value.}
 }
 

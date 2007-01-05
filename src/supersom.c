@@ -19,6 +19,9 @@
    Author: Ron Wehrens
 */
 
+/* Oct. 18 2007: copied the check for equality of distances from BDR's
+   class library */
+
 #include <R_ext/Arith.h>
 
 #include <R.h>
@@ -28,10 +31,12 @@
 #define RANDOUT PutRNGstate()
 #define UNIF unif_rand()
 
+#define EPS 1e-4                /* relative test of equality of distances */
+
 
 void supersom(double *data, double *codes,
 	      double *nhbrdist,
-	      double *alphas, double *radius,
+	      double *alphas, double *radii,
 	      double *weights, double *changes,
 	      double *unitdistances, double *maxdists, /* working arrays */
 	      Sint *pn, Sint *pnmat, Sint *nvar, Sint *nNA,
@@ -47,7 +52,7 @@ void supersom(double *data, double *codes,
     k,                 /* counter over iterations */
     l,                 /* counter over nmat */
     m,                 /* counter over rlen */
-    nearest, niter, dataoffset;
+    nearest, niter, dataoffset, nind;
   double dist, tmp, threshold, alpha;
   
   RANDIN;
@@ -105,15 +110,20 @@ void supersom(double *data, double *codes,
     }
     
     /* find overall smallest distance */
-    dist = DOUBLE_XMAX;
+    nind = 0; dist = DOUBLE_XMAX;
     for (cd = 0; cd < ncodes; cd++) {
       tmp = 0.0;
       for (l = 0; l < nmat; l++) 
 	tmp += weights[l] * unitdistances[cd + l*ncodes];      
       
-      if (tmp < dist) {
+      if (tmp <= dist * (1 + EPS)) {
+	if (tmp < dist * (1 - EPS)) {
+	  nind = 0;
+	  nearest = cd;
+	} else {
+	  if(++nind * UNIF < 1.0) nearest = cd;
+	}
 	dist = tmp;
-	nearest = cd;
       }
     }
     
@@ -121,10 +131,8 @@ void supersom(double *data, double *codes,
 	  nearest, dist); */
  
     /* linear decays for radius and learning parameter */
-    threshold = *radius - 
-      (*radius - 1.0) * 3.0 * (double) k / (double) niter;
-    if (threshold < 1.0) threshold = 0.5;
-    
+    threshold = radii[0] - (radii[0] - radii[1]) * (double) k / (double) niter;
+    if (threshold < 1.0) threshold = 0.5;    
     alpha = alphas[0] - (alphas[0] - alphas[1]) * (double)k/(double)niter;
     
     m = (int)(k/n);

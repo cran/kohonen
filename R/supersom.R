@@ -1,12 +1,16 @@
 "supersom" <- function(data, grid = somgrid(), rlen = 100,
                        alpha = c(0.05, 0.01),
-                       radius = quantile(nhbrdist, 0.67),
-                       toroidal = FALSE,
+                       radius = quantile(nhbrdist, 0.67) * c(1, -1),
+                       toroidal = FALSE, n.hood,
                        whatmap = NULL, weights = 1,
                        maxNA.fraction = .5,
                        keep.data = TRUE)
 {
+  if (!is.numeric(data))
+    stop("Argument data should be numeric")
+
   if (length(weights) == 1) weights <- rep(weights, length(data))
+
   whatmap <- check.whatmap(data, whatmap)
   whatmap <- whatmap[weights[whatmap] != 0]
   nmat <- length(whatmap)
@@ -70,11 +74,20 @@
   nNA <- sapply(data, function(x) apply(x, 1, function(y) sum(is.na(y))))
   ##print(nNA[1+c(602, 311, 500, 200, 22, 259, 7, 350),])
   
+  if (missing(n.hood)) {
+    n.hood <- switch(grid$topo,
+                     hexagonal = "circular",
+                     rectangular = "square")
+  } else {
+    n.hood <- match.arg(n.hood, c("circular", "square"))
+  }
+  grid$n.hood <- n.hood
   ng <- nrow(grid$pts)
   nhbrdist <- unit.distances(grid, toroidal)
   ## temporary variables for storing distances of an object to all units
   unitdistances <- matrix(0, ng, nmat)
-
+  if (length(radius) == 1) radius <- sort(radius * c(1, -1), decreasing = TRUE)
+  
   ## initialisation
   starters <- sample(1:nobjects, ng, replace = FALSE)
   init <- vector("list", nmat)
@@ -96,7 +109,7 @@
             codes = as.double(init),
             nhbrdist = as.double(nhbrdist),
             alpha = as.double(alpha),
-            radius = as.double(radius),
+            radii = as.double(radius),
             weights = as.double(weights), # vector now
             changes = as.double(changes), # matrix with n columns
             unitdistances = as.double(unitdistances), # matrix with n columns
@@ -135,13 +148,15 @@
                    unit.classif = mapping$unit.classif,
                    distances = mapping$distances,
                    grid = grid, codes = codes,
-                   changes = changes, toroidal = toroidal,
+                   changes = changes, alpha = alpha,
+                   radius = radius, toroidal = toroidal,
                    weights = orig.weights,
                    whatmap = whatmap, method = "supersom"),
               class = "kohonen")
   } else {
     structure(list(grid = grid, codes = codes,
-                   changes = changes, toroidal = toroidal,
+                   changes = changes, alpha = alpha,
+                   radius = radius, toroidal = toroidal,
                    weights = orig.weights, 
                    whatmap = whatmap, method = "supersom"),
               class = "kohonen")

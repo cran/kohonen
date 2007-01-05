@@ -3,10 +3,12 @@
 
 "xyf" <- function(data, Y, grid = somgrid(), rlen = 100,
                   alpha = c(0.05, 0.01),
-                  radius = quantile(nhbrdist, 0.67),
+                  radius = quantile(nhbrdist, 0.67) * c(1, -1),
                   xweight = 0.5, contin = !(all(rowSums(Y) == 1)),
-                  toroidal = FALSE, keep.data = TRUE)
+                  toroidal = FALSE, n.hood, keep.data = TRUE)
 {
+  if (!is.numeric(data))
+    stop("Argument data should be numeric")
   data <- as.matrix(data)
   
   nd <- nrow(data)
@@ -14,6 +16,7 @@
 
   if (is.vector(Y)) Y <- matrix(Y, ncol=1)
   ny <- ncol(Y)
+  
   ng <- nrow(grid$pts)
   xdists <- ydists <- rep(0, ng)  
 
@@ -27,7 +30,19 @@
     codeYs <- Y[starters,]
   }
 
+  if (missing(n.hood)) {
+    n.hood <- switch(grid$topo,
+                     hexagonal = "circular",
+                     rectangular = "square")
+  } else {
+    n.hood <- match.arg(n.hood, c("circular", "square"))
+  }
+  grid$n.hood <- n.hood
   nhbrdist <- unit.distances(grid, toroidal)
+
+  if (length(radius) == 1)
+    radius <- sort(radius * c(1, -1), decreasing = TRUE)
+
   changes <- rep(0, rlen*2)
 
   if (contin) {
@@ -38,7 +53,7 @@
               codeYs = as.double(codeYs),
               nhbrdist = as.double(nhbrdist),
               alpha = as.double(alpha),
-              radius = as.double(radius),
+              radii = as.double(radius),
               xweight = as.double(xweight),
               changes = as.double(changes),
               xdists = as.double(xdists),
@@ -83,13 +98,15 @@
     
     structure(list(data = data, Y = Y, contin = contin,
                    grid = grid, codes = codes,
-                   changes = changes, toroidal = toroidal,
+                   changes = changes, alpha = alpha,
+                   radius = radius, toroidal = toroidal,
                    unit.classif = mapping$unit.classif,
                    distances = mapping$distances, method="xyf"),
               class = "kohonen")
   } else {
     structure(list(contin = contin, grid = grid, codes = codes,
-                   changes = changes, toroidal = toroidal, method="xyf"), 
+                   changes = changes, alpha = alpha,
+                   radius = radius, toroidal = toroidal, method="xyf"), 
               class = "kohonen")
   }
 }

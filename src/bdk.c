@@ -7,17 +7,24 @@
    vice versa.
 */
 
+/* Oct. 18 2007: copied the check for equality of distances from BDR's
+   class library */
+
+
 #include <R.h>
 
 #define RANDIN  GetRNGstate()
 #define RANDOUT PutRNGstate()
 #define UNIF unif_rand()
 
+#define EPS 1e-4                /* relative test of equality of distances */
+
+
 
 void BDK_Eucl(double *data, double *Ys, 
 	      double *codes, double *codeYs,
 	      double *nhbrdist,
-	      double *alphas, double *radius, 
+	      double *alphas, double *radii, 
 	      double *xweight,
 	      double *changes,
 	      double *xdists, double *ydists, /* working arrays */
@@ -25,7 +32,7 @@ void BDK_Eucl(double *data, double *Ys,
 	      Sint *pncodes, Sint *prlen)
 {
   int n = *pn, py = *ppy, px = *ppx, ncodes = *pncodes, rlen = *prlen;
-  int cd, i, j, k, l, xnearest, ynearest, niter;
+  int cd, i, j, k, l, xnearest, ynearest, niter, nind;
   double dm, xdist, ydist, dist, tmp, maxx, maxy, distwght, 
     alpha, threshold;
 
@@ -68,32 +75,40 @@ void BDK_Eucl(double *data, double *Ys,
     distwght = *xweight - (*xweight - 0.5) * k / niter; 
     
     /* find nearest in x for updating Y */
-    dist = DOUBLE_XMAX;
+    nind = 0; dist = DOUBLE_XMAX;
     for (cd = 0; cd < ncodes; cd++) {
       tmp = distwght * xdists[cd] + (1.0 - distwght) * ydists[cd];
-      if (tmp < dist) {
+
+      if (tmp <= dist * (1 + EPS)) {
+	if (tmp < dist * (1 - EPS)) {
+	  nind = 0;
+	  xnearest = cd;
+	} else {
+	  if(++nind * UNIF < 1.0) xnearest = cd;
+	}
 	dist = tmp;
-	xnearest = cd;
       }
     }
-    
+
     /* find nearest in y for updating X */
-    dist = DOUBLE_XMAX;
+    nind = 0; dist = DOUBLE_XMAX;
     for (cd = 0; cd < ncodes; cd++) {
       tmp = (1.0 - distwght) * xdists[cd] + distwght * ydists[cd];
-      if (tmp < dist) {
+
+      if (tmp <= dist * (1 + EPS)) {
+	if (tmp < dist * (1 - EPS)) {
+	  nind = 0;
+	  ynearest = cd;
+	} else {
+	  if(++nind * UNIF < 1.0) ynearest = cd;
+	}
 	dist = tmp;
-	ynearest = cd;
       }
     }
 
-    /*    threshold = *radius * exp(-decay * (double) k / (double)
-	  niter); */
     /* linear decays for radius and learning parameter */
-    threshold = *radius - 
-      (*radius - 1.0) * (3.0 * (double) k / (double) niter);
+    threshold = radii[0] - (radii[0] - radii[1]) * (double) k / (double) niter;
     if (threshold < 1.0) threshold = 0.5;
-
     alpha = alphas[0] - (alphas[0] - alphas[1]) * (double)k/(double)niter;
 
     l = (int)(k/n);
@@ -135,7 +150,7 @@ void BDK_Eucl(double *data, double *Ys,
 void BDK_Tani(double *data, double *Ys, 
 	      double *codes, double *codeYs,
 	      double *nhbrdist,
-	      double *alphas, double *radius, 
+	      double *alphas, double *radii, 
 	      double *xweight,
 	      double *changes,
 	      double *xdists, double *ydists, /* working arrays */
@@ -143,7 +158,7 @@ void BDK_Tani(double *data, double *Ys,
 	      Sint *pncodes, Sint *prlen)
 {
   int n = *pn, py = *ppy, px = *ppx, ncodes = *pncodes, rlen = *prlen;
-  int cd, i, j, k, l, xnearest, ynearest, niter;
+  int cd, i, j, k, l, xnearest, ynearest, niter, nind;
   double dm, xdist, ydist, dist, tmp, maxx, maxy, distwght, 
     alpha, threshold, decay;
 
@@ -206,14 +221,9 @@ void BDK_Tani(double *data, double *Ys,
       }
     }
 
-    /*    threshold = *radius * exp(-decay * (double) k / (double)
-	  niter); */
     /* linear decays for radius and learning parameter */
-    threshold = *radius - 
-      (*radius - 1.0) * (3.0 * (double) k / (double) niter);
+    threshold = radii[0] - (radii[0] - radii[1]) * (double) k / (double) niter;
     if (threshold < 1.0) threshold = 0.5;
-
-
     alpha = alphas[0] - (alphas[0] - alphas[1]) * (double)k/(double)niter;
 
     l = (int)(k/n);

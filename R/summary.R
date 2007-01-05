@@ -46,7 +46,7 @@ summary.kohonen <- function(object, ...)
 print.kohonen <- function(x, ...)
 {
   cat(x$method, " map of size ", x$grid$xdim, "x", x$grid$ydim,
-      " with a ", x$grid$topo, if (x$toroidal) "toroidal",
+      " with a ", x$grid$topo, if (x$toroidal) " toroidal",
       " topology.", sep="")
   if (!is.null(x$data))
     cat("\nTraining data included.")

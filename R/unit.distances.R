@@ -1,12 +1,15 @@
 ### Calculate distances in a Kohonen map. Crude and
 ### slow implementation, but hey.
 
+### Oct. 18: fixed bug - rectangular toroidal grid led to Euclidean
+### distances instead of maximum distances
+
 unit.distances <- function(grid, toroidal)
 {
   if (!toroidal) {
-    if (grid$topo == "hexagonal")
+    if (grid$n.hood == "circular")
       return(as.matrix(stats::dist(grid$pts)))
-    if (grid$topo == "rectangular")
+    if (grid$n.hood == "square")
       return(as.matrix(stats::dist(grid$pts, method="maximum")))
   }
 
@@ -22,10 +25,18 @@ unit.distances <- function(grid, toroidal)
         diffs[1] <- 2*maxdiffx - diffs[1]
       if (diffs[2] > maxdiffy)
         diffs[2] <- 2*maxdiffy - diffs[2]
-
-      result[i,j] <- sum(diffs^2)
+      
+        if (grid$topo == "hexagonal") {
+          result[i,j] <- sum(diffs^2)
+        } else {
+          result[i,j] <- max(diffs)
+        }
     }
   }
 
-  sqrt(result + t(result))
+  if (grid$n.hood == "circular") {
+    sqrt(result + t(result))
+  } else {
+    result + t(result)
+  }
 }

@@ -1,0 +1,15 @@
+The kohonen package version 2.0.0 is described in 
+R. Wehrens and L.M.C. Buydens, J. Stat. Softw. 21(5), 2007
+
+Changes in version 2.0.1:
+  - fixed a bug in unit.distances: for rectangular maps the toroidal
+    argument was ignored. Updated the corresponding example as well.
+  - added an argument 'n.hood' to functions som, xyf, bdk and
+    supersom, so that the user can decide what distance measure to use
+    when calculating distances between units. Useful to compare the
+    results with other som implementations.
+  - specification of radius as (start, stop), similar to alpha. This
+    gives better control (suggestion of Hadley Wickham).
+  - more sanity checking in functions som, xyf, bdk and supersom 
+    (suggestion of Hadley Wickham).
+  - added the J. Stat. Softw. paper and a CITATION file to the distribution.

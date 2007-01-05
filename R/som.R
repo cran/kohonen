@@ -1,16 +1,38 @@
 "som" <- function (data, grid = somgrid(),
                    rlen = 100, alpha = c(0.05, 0.01),
-                   radius = quantile(nhbrdist, 0.67),
-                   init, toroidal = FALSE, keep.data = TRUE)
+                   radius = quantile(nhbrdist, 0.67) * c(1, -1),
+                   init, toroidal = FALSE,
+                   n.hood, keep.data = TRUE)
 {
+  if (!is.numeric(data))
+    stop("Argument data should be numeric")
   data <- as.matrix(data)
-  nd <- nrow(data)
   
+  nd <- nrow(data)
   ng <- nrow(grid$pts)
-  if (missing(init))
+  if (missing(init)) {
     init <- data[sample(1:nd, ng, replace = FALSE), , drop = FALSE]
+  } else {
+    init <- as.matrix(init)
+    if (nrow(init) != ng |
+        ncol(init) != ncol(data) |
+        !is.numeric(init))
+      stop("incorrect init matrix supplied")
+  }
   codes <- init
+
+  if (missing(n.hood)) {
+    n.hood <- switch(grid$topo,
+                     hexagonal = "circular",
+                     rectangular = "square")
+  } else {
+    n.hood <- match.arg(n.hood, c("circular", "square"))
+  }
+  grid$n.hood <- n.hood
   nhbrdist <- unit.distances(grid, toroidal)
+  
+  if (length(radius) == 1)
+    radius <- sort(radius * c(1, -1), decreasing = TRUE)
 
   changes <- rep(0, rlen)
   
@@ -36,12 +58,14 @@
     mapping <- map.kohonen(list(codes = codes), newdata = data)
     
     structure(list(data = data, grid = grid, codes = codes,
-                   changes = changes, toroidal = toroidal,
+                   changes = changes, alpha = alpha,
+                   radius = radius, toroidal = toroidal,
                    unit.classif = mapping$unit.classif,
                    distances = mapping$distances, method="som"),
               class = "kohonen")
   } else {
-    structure(list(grid = grid, codes = codes, changes = changes, 
+    structure(list(grid = grid, codes = codes, changes = changes,
+                   alpha = alpha, radius = radius,
                    toroidal = toroidal, method="som"),
               class = "kohonen")
   }
