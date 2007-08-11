@@ -72,6 +72,12 @@ supersom(data, grid=somgrid(), rlen = 100, alpha = c(0.05, 0.01),
 
 \seealso{\code{\link{somgrid}}, \code{\link{plot.kohonen}}}
 \examples{
+data(yeast)
+yeast.supersom <- supersom(yeast, somgrid(6, 6, "hexagonal"), whatmap = 3:6)
+obj.classes <- as.integer(yeast$class)
+colors <- c("yellow", "green", "blue", "red", "orange")
+plot(yeast.supersom, type = "mapping", col = colors[obj.classes],
+     pch = obj.classes, main = "yeast data", keepMargins = TRUE)
 }
 
 \keyword{classif}

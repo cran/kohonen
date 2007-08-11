@@ -6,14 +6,14 @@
                        maxNA.fraction = .5,
                        keep.data = TRUE)
 {
-  if (!is.numeric(data))
-    stop("Argument data should be numeric")
-
   if (length(weights) == 1) weights <- rep(weights, length(data))
 
   whatmap <- check.whatmap(data, whatmap)
   whatmap <- whatmap[weights[whatmap] != 0]
   nmat <- length(whatmap)
+
+  if (!all(lapply(data[whatmap], is.numeric)))
+    stop("Argument data should be numeric")
 
   orig.data <- data
   data <- data[whatmap]

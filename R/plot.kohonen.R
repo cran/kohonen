@@ -85,7 +85,7 @@ plot.kohmapping <- function(x, classif, main, labels, pchs, bgcol,
   if (is.null(classif) & !is.null(x$unit.classif)) {
     classif <- x$unit.classif
   } else {
-    if (!is.null(classif$unit.classif))
+    if (is.list(classif) && !is.null(classif$unit.classif))
       classif <- classif$unit.classif
   }
   if (is.null(classif))
@@ -248,7 +248,7 @@ plot.kohcounts <- function(x, classif, main, palette.name, ncolors,
   if (is.null(classif) & !is.null(x$unit.classif)) {
     classif <- x$unit.classif
   } else {
-    if (!is.null(classif$unit.classif))
+    if (is.list(classif) && !is.null(classif$unit.classif))
       classif <- classif$unit.classif
   }
   if (is.null(classif))
@@ -257,10 +257,13 @@ plot.kohcounts <- function(x, classif, main, palette.name, ncolors,
   counts <- rep(NA, nrow(x$grid$pts))
   huhn <- table(classif)
   counts[as.integer(names(huhn))] <- huhn
+
+  contin <- FALSE
+  if (max(counts, na.rm = TRUE) > 10) contin <- TRUE
   
   plot.kohprop(x, property = counts, main = main,
                palette.name = palette.name, ncolors = ncolors,
-               zlim = zlim, heatkey = heatkey, contin = FALSE,
+               zlim = zlim, heatkey = heatkey, contin = contin,
                keepMargins = keepMargins, ...)
 }
 
@@ -277,7 +280,9 @@ plot.kohquality <- function(x, classif, main, palette.name, ncolors,
     classif <- x$unit.classif
     distances <- x$distances
   } else {
-    if (!is.null(classif$unit.classif) & !is.null(classif$distances)) {
+    if (is.list(classif) &&
+        !is.null(classif$unit.classif) &&
+        !is.null(classif$distances)) {
       classif <- classif$unit.classif
       distances <- classif$distances
     }

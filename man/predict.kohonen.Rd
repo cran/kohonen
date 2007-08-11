@@ -11,7 +11,7 @@
   used for prediction.
 }
 \usage{
-predict.kohonen(object, newdata, trainX, trainY, unit.predictions,
+\method{predict}{kohonen}(object, newdata, trainX, trainY, unit.predictions,
                  threshold = 0, whatmap = NULL, weights = 1, ...)
 }
 \arguments{

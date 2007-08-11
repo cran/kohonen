@@ -17,3 +17,11 @@ Changes in version 2.0.1:
 Changes in version 2.0.2:
   - changed the 'predict.kohonen' function to take account of a change
     in the behaviour of 'aggregate' in R version 2.6.0 and later
+
+Changes in version 2.0.3:
+  - removed a bug in supersom, introduced in 2.0.1 when checking if
+    the data are numeric.
+  - added an example for supersom.
+  - removed a bug in plot.kohcounts, arising when empty units are
+    present
+  - updated man files for methods 'plot', 'predict', and 'map'

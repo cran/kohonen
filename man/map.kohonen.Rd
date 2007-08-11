@@ -6,7 +6,7 @@
   Map a data matrix onto a trained SOM.
 }
 \usage{
-map.kohonen(x, newdata, whatmap = NULL, weights,
+\method{map}{kohonen}(x, newdata, whatmap = NULL, weights,
             scale.distances = (nmaps > 1), ...)
 }
 \arguments{

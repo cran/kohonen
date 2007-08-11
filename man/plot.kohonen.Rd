@@ -14,13 +14,13 @@
   of plots are supported.
 }
 \usage{
-plot.kohonen(x, type = c("codes", "changes", "counts", "mapping",
-                         "property", "quality"),
-             classif = NULL, labels = NULL, pchs = NULL, main = NULL,
-             palette.name = heat.colors, ncolors, bgcol = NULL,
-             zlim = NULL, heatkey = TRUE, property, contin,
-             whatmap = NULL, codeRendering = NULL, keepMargins = FALSE,
-             \dots) 
+\method{plot}{kohonen}(x, type = c("codes", "changes", "counts", "mapping",
+                 "property", "quality"),
+     classif = NULL, labels = NULL, pchs = NULL, main = NULL,
+     palette.name = heat.colors, ncolors, bgcol = NULL,
+     zlim = NULL, heatkey = TRUE, property, contin,
+     whatmap = NULL, codeRendering = NULL, keepMargins = FALSE,
+     \dots) 
 }
 \arguments{
   \item{x}{kohonen object.}
