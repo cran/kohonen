@@ -63,15 +63,21 @@
         unit.predictions <- matrix(NA, nrow(object$grid$pts), nY)
         huhn <- aggregate(trainY, by = list(cl = trainingMapping),
                           mean)
-        unit.predictions[sort(as.numeric(levels(huhn[, 1]))),] <-
-          as.matrix(huhn[, -1])
+        ## From 2.6.0 on, this should change... Hrmpfff.
+        if (R.version$major <= "2" & R.version$minor < "6.0") {
+          unit.predictions[sort(as.numeric(levels(huhn[, 1]))),] <-
+                  as.matrix(huhn[, -1])
+        } else {
+          unit.predictions[huhn[,1],] <- as.matrix(huhn[,-1])
+        }
         
         ## Prediction for empty units
         nas <- which(apply(unit.predictions, 1, function(x) all(is.na(x))))
-        nhbrdist <- unit.distances(object$grid, !is.null(object$toroidal))
+        nhbrdist <- unit.distances(object$grid, object$toroidal)
         for (i in seq(along = nas)) {
           unit.predictions[nas[i], ] <-
-            mean(unit.predictions[nhbrdist[i,] == 1, ], na.rm = TRUE)
+            colMeans(unit.predictions[nhbrdist[nas[i],] == 1, , drop=FALSE],
+                     na.rm = TRUE)
         }
         
         colnames(unit.predictions) <- colnames(trainY)
