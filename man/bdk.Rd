@@ -15,8 +15,7 @@
 \usage{
 bdk(data, Y, grid=somgrid(), rlen = 100, alpha = c(0.05, 0.01),
     radius = quantile(nhbrdist, 0.67) * c(1, -1), xweight = 0.75,
-    contin = !(all(rowSums(Y) == 1)), 
-    toroidal = FALSE, n.hood, keep.data = TRUE)
+    contin, toroidal = FALSE, n.hood, keep.data = TRUE)
 }
 
 \arguments{
@@ -109,7 +108,7 @@ Xtest <- scale(wines[-training,],
                scale = attr(Xtraining, "scaled:scale"))
 
 bdk.wines <- bdk(Xtraining,
-                 classvec2classmat(wine.classes[training]),
+                 factor(wine.classes[training]),
                  grid = somgrid(5, 5, "hexagonal"))
 
 bdk.prediction <- predict(bdk.wines, newdata=Xtest)

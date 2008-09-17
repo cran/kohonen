@@ -68,8 +68,7 @@ som.wines <- som(Xtraining, grid = somgrid(5, 5, "hexagonal"))
 
 som.prediction <- predict(som.wines, newdata = Xtest,
           trainX = Xtraining,
-          trainY = classvec2classmat(wine.classes[training]))
-table(wine.classes[-training],
-      classmat2classvec(som.prediction$prediction))
+          trainY = factor(wine.classes[training]))
+table(wine.classes[-training], som.prediction$prediction)
 }
 \keyword{classif}

@@ -15,9 +15,7 @@
 
   ## Find the mapping for the new data
   if (is.null(mapping))
-    mapping <- map(object, newdata, whatmap, weights)$unit.classif
-  ### FIXME: is hetvolgende OK?
-  ## whatmap <- mapping$whatmap
+    mapping <- map.kohonen(object, newdata, whatmap, weights)$unit.classif
   
   ## Find the value for each unit. For unsupervised maps, we should
   ## have trainX and trainY values. Argument unit.predictions may
@@ -25,23 +23,40 @@
   if (is.null(unit.predictions)) {
     if (object$method %in% c("xyf", "bdk")) {
       unit.predictions <- object$codes$Y
+      contin <- object$contin
     } else {
-      ## If whatmap is given, and not all layers present in the map are
+      ## If whatmap is given, and not all layers used in training the map are
       ## included, the excluded layers are interpreted as being the ones
-      ## for which a prediction is wanted.
-      if (object$method == "supersom" & !is.null(whatmap)) {
+      ## for which a prediction is wanted. Unit.predictions are already
+      ## available.
+      if (object$method == "supersom" &&
+          !is.null(whatmap)) {
         whatmap <- check.whatmap(object, whatmap)
-        if (length(whatmap) < length(object$data))
-          unit.predictions <- object$codes[-whatmap]    
-      } else {
+        
+        trained.layers <- object$whatmap[!(object$whatmap %in% whatmap)]
+        if (length(trained.layers) > 0) {
+          unit.predictions <- object$codes[trained.layers]
+          contin <- object$contin[trained.layers]
+        }
+      }
+
+      ## If unit.predictions are not available, we have to find
+      ## them... For SOMs and supersoms.
+      if (is.null(unit.predictions)) {
         if (missing(trainY))
           stop("For unsupervised forms of mapping, trainY is required")
-        if (is.list(trainY))
-          stop("Prediction for trainY lists not implemented")
+        if (!is.list(trainY))
+          trainY <- list(trainY)
         
-        if (is.vector(trainY))
-          trainY <- matrix(trainY, ncol = 1)
-        nY <- ncol(trainY)
+        contin <- !(sapply(trainY, is.factor))
+        trainY[!contin] <- lapply(trainY[!contin], classvec2classmat)
+
+        trainY[sapply(trainY, is.vector)] <-
+          lapply(trainY[sapply(trainY, is.vector)], matrix, ncol = 1)
+
+        contin <- sapply(trainY,
+                         function(x) any(abs(rowSums(x) - 1) > 1e-8))
+        nY <- sapply(trainY, ncol)
         
         trainingMapping <- NULL
         if (missing(trainX) & !is.null(object$data)) {
@@ -52,50 +67,58 @@
         nX <- ifelse(is.list(trainX),
                      nrow(trainX[[1]]),
                      nrow(trainX))
-        if (nX != nrow(trainY))
+        if (nX != nrow(trainY[[1]]))
           stop("Unequal number of rows in trainX and trainY")
-
+        
         ## Find mapping for training data
         if (is.null(trainingMapping))
-          trainingMapping <- map(object, trainX)$unit.classif
-
-        ## Find unit.predictions for training data
-        unit.predictions <- matrix(NA, nrow(object$grid$pts), nY)
-        huhn <- aggregate(trainY, by = list(cl = trainingMapping),
-                          mean)
-        ## From 2.6.0 on, this should change... Hrmpfff.
-        if (R.version$major <= "2" & R.version$minor < "6.0") {
-          unit.predictions[sort(as.numeric(levels(huhn[, 1]))),] <-
-                  as.matrix(huhn[, -1])
-        } else {
-          unit.predictions[huhn[,1],] <- as.matrix(huhn[,-1])
-        }
+          trainingMapping <- map.kohonen(object, trainX)$unit.classif
         
-        ## Prediction for empty units
-        nas <- which(apply(unit.predictions, 1, function(x) all(is.na(x))))
         nhbrdist <- unit.distances(object$grid, object$toroidal)
-        for (i in seq(along = nas)) {
-          unit.predictions[nas[i], ] <-
-            colMeans(unit.predictions[nhbrdist[nas[i],] == 1, , drop=FALSE],
-                     na.rm = TRUE)
-        }
+
+        ## Find unit.predictions for training data; loop over list elements
+        unit.predictions <- vector(length(nY), mode = "list")
+        names(unit.predictions) <- names(trainY)
         
-        colnames(unit.predictions) <- colnames(trainY)
+        for (ii in seq(along = trainY)) {
+          unit.predictions[[ii]] <- matrix(NA, nrow(object$grid$pts), nY[ii])
+          huhn <- aggregate(trainY[[ii]], by = list(cl = trainingMapping),
+                            mean)
+          ## From 2.6.0 on, this should change... Hrmpfff.
+          if (R.version$major <= "2" & R.version$minor < "6.0") {
+            unit.predictions[[ii]][sort(as.numeric(levels(huhn[, 1]))),] <-
+              as.matrix(huhn[, -1])
+          } else {
+            unit.predictions[[ii]][huhn[,1],] <- as.matrix(huhn[,-1])
+          }
+          
+          ## Prediction for empty units
+          nas <- which(apply(unit.predictions[[ii]],
+                             1,
+                             function(x) all(is.na(x))))
+          for (i in seq(along = nas)) {
+            unit.predictions[[ii]][nas[i], ] <-
+              colMeans(unit.predictions[[ii]][nhbrdist[nas[i],] == 1, ,
+                                              drop=FALSE], na.rm = TRUE)
+          }
+          
+          colnames(unit.predictions[[ii]]) <- colnames(trainY[[ii]])
+        }
       }
     }
   }
-      
 
-  if (!is.null(object$contin) && !object$contin) {
-    prediction <- # xyf or bdk for categorical variables
-      classmat2classvec(unit.predictions, threshold=threshold)[mapping]
+  if (length(unit.predictions) == 1)
+    unit.predictions <- unit.predictions[[1]]
+  
+  if (is.list(unit.predictions)) { # supersom
+    prediction <- lapply(unit.predictions, function(x) x[mapping,])
+    prediction[!contin] <- lapply(prediction[!contin],
+                                  classmat2classvec, threshold = threshold)
   } else {
-    if (is.list(unit.predictions)) { # supersom
-      prediction <- sapply(unit.predictions,
-                           function(x) x[mapping,])
-    } else {
-      prediction <- unit.predictions[mapping,]
-    }
+    prediction <- unit.predictions[mapping,]
+    if (!contin)
+      prediction <- classmat2classvec(prediction, threshold = threshold)
   }
   
   list(prediction = prediction, unit.classif = mapping,

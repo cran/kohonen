@@ -4,7 +4,7 @@
 "xyf" <- function(data, Y, grid = somgrid(), rlen = 100,
                   alpha = c(0.05, 0.01),
                   radius = quantile(nhbrdist, 0.67) * c(1, -1),
-                  xweight = 0.5, contin = !(all(rowSums(Y) == 1)),
+                  xweight = 0.5, contin,
                   toroidal = FALSE, n.hood, keep.data = TRUE)
 {
   if (!is.numeric(data))
@@ -14,8 +14,17 @@
   nd <- nrow(data)
   nx <- ncol(data)
 
-  if (is.vector(Y)) Y <- matrix(Y, ncol=1)
-  ny <- ncol(Y)
+  if (is.factor(Y)) {
+    YY <- classvec2classmat(Y)
+  } else {
+    if (is.vector(Y)) {
+      YY <- matrix(Y, ncol=1)
+    } else {
+      YY <- Y
+    }
+  }
+  ny <- ncol(YY)
+  contin <- any(abs(rowSums(YY) - 1) > 1e-8)
   
   ng <- nrow(grid$pts)
   xdists <- ydists <- rep(0, ng)  
@@ -23,11 +32,11 @@
   starters <- sample(1:nd, ng, replace = FALSE)
   init <- data[starters, , drop = FALSE]
   codes <- init
-  if (!contin) {
+  if (!contin) { # factor, classification
     ## rescale to .25 - .75 in order to make class transitions easier
-    codeYs <- 0.5 + 0.5*(Y[starters,] - 0.5)
+    codeYs <- 0.5 + 0.5*(YY[starters,] - 0.5)
   } else {
-    codeYs <- Y[starters,]
+    codeYs <- YY[starters,]
   }
 
   if (missing(n.hood)) {
@@ -48,7 +57,7 @@
   if (contin) {
     res <- .C("XYF_Eucl",
               data = as.double(data),
-              Ys = as.double(Y),
+              Ys = as.double(YY),
               codes = as.double(codes),
               codeYs = as.double(codeYs),
               nhbrdist = as.double(nhbrdist),
@@ -67,7 +76,7 @@
   } else {
     res <- .C("XYF_Tani",
               data = as.double(data),
-              Ys = as.double(Y),
+              Ys = as.double(YY),
               codes = as.double(codes),
               codeYs = as.double(codeYs),
               nhbrdist = as.double(nhbrdist),
@@ -89,7 +98,7 @@
   colnames(changes) <- c("X", "Y")
   codes <- list(X = matrix(res$codes, nrow(init), ncol(init)),
                 Y = matrix(res$codeYs, ng, ny))
-  colnames(codes$Y) <- colnames(Y)
+  colnames(codes$Y) <- colnames(YY)
 
   if (keep.data) {
     mapping <- map.kohonen(list(codes = codes),

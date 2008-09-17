@@ -1,6 +1,7 @@
 check.whatmap <- function(x, whatmap)
 {
   checkpar <- NULL
+  whatmap <- unique(whatmap)
   
   if (!is.null(x$codes)) {
     checkpar <- x$codes

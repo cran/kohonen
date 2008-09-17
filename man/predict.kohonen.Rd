@@ -35,10 +35,13 @@
 }
 \value{
   Returns a list with components
-  \item{prediction}{predicted values for the properties of interest.}
+  \item{prediction}{predicted values for the properties of
+    interest. When multiple values are predicted, this element is a
+    list, otherwise a vector or a matrix.}
   \item{unit.classif}{unit numbers to which objects in the data matrix are
     mapped.}
-  \item{unit.predictions}{property values associated with map units.}
+  \item{unit.predictions}{mean values associated with map units. Again,
+    when multiple properties are predicted, this is a list.}
 }
 \author{Ron Wehrens}
 \seealso{\code{\link{som}},\code{\link{xyf}},\code{\link{bdk}},
@@ -57,8 +60,65 @@ som.wines <- som(Xtraining, grid = somgrid(5, 5, "hexagonal"))
 
 som.prediction <- predict(som.wines, newdata = Xtest,
           trainX = Xtraining,
-          trainY = classvec2classmat(wine.classes[training]))
-table(wine.classes[-training],
-      classmat2classvec(som.prediction$prediction))
+          trainY = factor(wine.classes[training]))
+table(wine.classes[-training], som.prediction$prediction)
+
+### more complicated examples
+\dontrun{
+data(yeast)
+
+### only consider complete cases
+missings <- (apply(cbind(yeast$alpha, yeast$cdc15), 1,
+                   function(x) any(is.na(x))))
+
+yeast2 <- list(alpha = yeast$alpha[!missings,],
+               cdc15 = yeast$cdc15[!missings,],
+               class = yeast$class[!missings])
+
+set.seed(7)
+training.indices <- sample(nrow(yeast2$alpha), 300)
+training <- rep(FALSE, nrow(yeast2$alpha))
+training[training.indices] <- TRUE
+
+## unsupervised mapping
+yeast2.som <- som(yeast2$alpha[training,], somgrid(4, 6, "hexagonal"))
+yeast2.som.prediction <- predict(yeast2.som,
+                                 newdata = yeast2$alpha[!training,],
+                                 trainY = yeast2$class[training])
+predicted.classes <- yeast2.som.prediction$prediction
+
+## supervised mapping (XYF)
+yeast2.xyf <- xyf(yeast2$alpha[training,], yeast2$class[training],
+                  somgrid(4, 6, "hexagonal"))
+yeast2.xyf.prediction <- predict(yeast2.xyf,
+                                 newdata = yeast2$alpha[!training,])
+
+## supervised mapping (BDK)
+yeast2.bdk <- bdk(yeast2$alpha[training,], yeast2$class[training],
+                  somgrid(4, 6, "hexagonal"))
+yeast2.bdk.prediction <- predict(yeast2.bdk,
+                                 newdata = yeast2$alpha[!training,])
+
+## unsupervised mapping (supersom): prediction of data layer not used
+## in training
+yeast2.ssom <- supersom(lapply(yeast2, function(x) subset(x, training)),
+                        grid = somgrid(4, 6, "hexagonal"),
+                        whatmap = 1)
+yeast2.ssom.prediction <- predict(yeast2.ssom,
+                                  newdata = lapply(yeast2,
+                                    function(x) subset(x, !training)),
+                                  trainY = list(class = yeast2$class[training]))
+
+## supervised mapping (supersom): prediction of a data layer that has
+## been used in training
+yeast2.ssom2 <- supersom(lapply(yeast2, function(x) subset(x, training)),
+                         grid = somgrid(4, 6, "hexagonal"),
+                         whatmap = c(1,3))
+yeast2.ssom2.prediction <- predict(yeast2.ssom2, 
+                                   newdata = lapply(yeast2,
+                                     function(x) subset(x, !training)),
+                                   whatmap = 1)
+}
+
 }
 \keyword{classif}

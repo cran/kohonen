@@ -11,7 +11,7 @@
 \usage{
 supersom(data, grid=somgrid(), rlen = 100, alpha = c(0.05, 0.01),
     radius = quantile(nhbrdist, 0.67) * c(1, -1), 
-    toroidal = FALSE, n.hood, whatmap = NULL, weights = 1,
+    contin, toroidal = FALSE, n.hood, whatmap = NULL, weights = 1,
     maxNA.fraction = .5, keep.data = TRUE)
 }
 
@@ -29,6 +29,9 @@ supersom(data, grid=somgrid(), rlen = 100, alpha = c(0.05, 0.01),
     value of that number; as soon as the neighbourhood gets smaller than
     one only the winning unit will be updated. The default is to start with a
     value that covers 2/3 of all unit-to-unit distances.}
+  \item{contin}{parameter indicating whether data are continuous or
+    categorical. The default is to check whether all row sums equal
+    1: in that case \code{contin} is \code{FALSE}.}
   \item{toroidal}{if TRUE, the edges of the map are joined. Note
     that in a hexagonal toroidal map, the number of rows must be even.}
   \item{n.hood}{the shape of the neighbourhood, either "circular" or
@@ -46,6 +49,8 @@ supersom(data, grid=somgrid(), rlen = 100, alpha = c(0.05, 0.01),
 \value{
   an object of class "kohonen" with components
   \item{data}{data matrix, only returned if \code{keep.data == TRUE}.}
+  \item{contin}{parameter indicating whether elements of \code{data}
+    are continuous or categorical.}
   \item{na.rows}{indices of objects (rows) that are removed because at
     least one of the layers has to many NAs for these objects.}
   \item{unit.classif}{winning units for all data objects,

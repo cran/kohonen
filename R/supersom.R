@@ -1,8 +1,13 @@
-"supersom" <- function(data, grid = somgrid(), rlen = 100,
+"supersom" <- function(data,
+                       grid = somgrid(),
+                       rlen = 100,
                        alpha = c(0.05, 0.01),
                        radius = quantile(nhbrdist, 0.67) * c(1, -1),
-                       toroidal = FALSE, n.hood,
-                       whatmap = NULL, weights = 1,
+                       contin,
+                       toroidal = FALSE,
+                       n.hood,
+                       whatmap = NULL,
+                       weights = 1,
                        maxNA.fraction = .5,
                        keep.data = TRUE)
 {
@@ -12,18 +17,11 @@
   whatmap <- whatmap[weights[whatmap] != 0]
   nmat <- length(whatmap)
 
-  if (!all(lapply(data[whatmap], is.numeric)))
-    stop("Argument data should be numeric")
-
   orig.data <- data
   data <- data[whatmap]
   weights <- weights[whatmap]
   orig.weights <- rep(0, length(orig.data))
   orig.weights[whatmap] <- weights
-
-  ## check data argument
-  if (!is.list(data) | !all(lapply(data, is.matrix)))
-    stop("data should be a list of data matrices")
 
   if (length(weights) != length(data))
     stop("number of weights should equal the number of data matrices")
@@ -33,6 +31,20 @@
   } else {
     weights <- weights / sum(weights)
   }
+
+  if (!is.list(data) | !all(sapply(data, is.matrix) | sapply(data, is.factor)))
+    stop("data should be a list of data matrices or factors")
+  if (any(sapply(data, is.factor))) {
+    data[sapply(data, is.factor)] <- lapply(data[sapply(data, is.factor)],
+                                            classvec2classmat)
+  }
+
+  if (!all(sapply(data, is.numeric)))
+    stop("Argument data should be numeric")
+
+  contin <- rep(NA, length(orig.data))
+  names(contin) <- names(orig.data)
+  contin[whatmap] <- sapply(data, function(x) any(abs(rowSums(x) - 1) > 1e-8))
 
   ## remove NAs: individual NAs are allowed but rows or columns
   ## containing more than maxNA.fraction of NAs are removed. Columns
@@ -72,7 +84,6 @@
   nvar <- sapply(data, ncol)
 
   nNA <- sapply(data, function(x) apply(x, 1, function(y) sum(is.na(y))))
-  ##print(nNA[1+c(602, 311, 500, 200, 22, 259, 7, 350),])
   
   if (missing(n.hood)) {
     n.hood <- switch(grid$topo,
@@ -131,9 +142,15 @@
   codes <- vector("list", length(orig.data))
   endings <- cumsum(nvar)
   beginnings <- c(1, cumsum(nvar)[-nmat] + 1)
+
   for (i in 1:nmat) {
     codes[[ whatmap[i] ]] <- codes2[, beginnings[i]:endings[i], drop=FALSE]
-    colnames(codes[[ whatmap[i] ]]) <- colnames(data[[i]])
+    
+    if (is.factor(orig.data[[ whatmap[i] ]])) {
+      colnames(codes[[ whatmap[i] ]]) <- levels(orig.data[[ whatmap[i] ]])
+    } else {
+      colnames(codes[[ whatmap[i] ]]) <- colnames(orig.data[[ whatmap[i] ]])
+    } 
   }
   
   names(codes) <- names(orig.data)
@@ -144,21 +161,32 @@
                                 whatmap = whatmap), 
                            newdata = orig.data)
         
-    structure(list(data = orig.data, na.rows = narows,
+    structure(list(data = orig.data,
+                   contin = contin,
+                   na.rows = narows,
                    unit.classif = mapping$unit.classif,
                    distances = mapping$distances,
-                   grid = grid, codes = codes,
-                   changes = changes, alpha = alpha,
-                   radius = radius, toroidal = toroidal,
+                   grid = grid,
+                   codes = codes,
+                   changes = changes,
+                   alpha = alpha,
+                   radius = radius,
+                   toroidal = toroidal,
                    weights = orig.weights,
-                   whatmap = whatmap, method = "supersom"),
+                   whatmap = whatmap,
+                   method = "supersom"),
               class = "kohonen")
   } else {
-    structure(list(grid = grid, codes = codes,
-                   changes = changes, alpha = alpha,
-                   radius = radius, toroidal = toroidal,
+    structure(list(grid = grid,
+                   contin = contin,
+                   codes = codes,
+                   changes = changes,
+                   alpha = alpha,
+                   radius = radius,
+                   toroidal = toroidal,
                    weights = orig.weights, 
-                   whatmap = whatmap, method = "supersom"),
+                   whatmap = whatmap,
+                   method = "supersom"),
               class = "kohonen")
   }
 }

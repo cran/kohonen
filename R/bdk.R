@@ -4,7 +4,7 @@
 "bdk" <- function(data, Y, grid = somgrid(), rlen = 100,
                   alpha = c(0.05, 0.01),
                   radius = quantile(nhbrdist, 0.67) * c(1, -1),
-                  xweight = 0.75, contin = !(all(rowSums(Y) == 1)),
+                  xweight = 0.75, contin,
                   toroidal = FALSE, n.hood, keep.data = TRUE)
 {
   if (!is.numeric(data))
@@ -14,8 +14,17 @@
   nd <- nrow(data)
   nx <- ncol(data)
   
-  if (is.vector(Y)) Y <- matrix(Y, ncol=1)
-  ny <- ncol(Y)
+  if (is.factor(Y)) {
+    YY <- classvec2classmat(Y)
+  } else {
+    if (is.vector(Y)) {
+      YY <- matrix(Y, ncol=1)
+    } else {
+      YY <- Y
+    }
+  }
+  ny <- ncol(YY)
+  contin <- any(abs(rowSums(YY) - 1) > 1e-8)
 
   ng <- nrow(grid$pts)
   xdists <- ydists <- rep(0, ng)  
@@ -25,9 +34,9 @@
   codes <- init
   if (!contin) {
     ## rescale to .25 - .75 in order to make class transitions easier
-    codeYs <- 0.5 + 0.5*(Y[starters,] - 0.5)
+    codeYs <- 0.5 + 0.5*(YY[starters,] - 0.5)
   } else {
-    codeYs <- Y[starters,]
+    codeYs <- YY[starters,]
   }
   
   if (missing(n.hood)) {
@@ -48,7 +57,7 @@
   if (contin) {
     res <- .C("BDK_Eucl",
               data = as.double(data),
-              Ys = as.double(Y),
+              Ys = as.double(YY),
               codes = as.double(codes),
               codeYs = as.double(codeYs),
               nhbrdist = as.double(nhbrdist),
@@ -67,7 +76,7 @@
   } else {
     res <- .C("BDK_Tani",
               data = as.double(data),
-              Ys = as.double(Y),
+              Ys = as.double(YY),
               codes = as.double(codes),
               codeYs = as.double(codeYs),
               nhbrdist = as.double(nhbrdist),
@@ -88,7 +97,7 @@
   changes <- matrix(res$changes, ncol=2)
   codes <- list(X = matrix(res$codes, nrow(init), ncol(init)),
                 Y = matrix(res$codeYs, ng, ny))
-  colnames(codes$Y) <- colnames(Y)
+  colnames(codes$Y) <- colnames(YY)
 
   if (keep.data) {
     mapping <- map.kohonen(list(codes = codes), newdata = data, whatmap = 1)

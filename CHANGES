@@ -25,3 +25,12 @@ Changes in version 2.0.3:
   - removed a bug in plot.kohcounts, arising when empty units are
     present
   - updated man files for methods 'plot', 'predict', and 'map'
+
+Changes in version 2.0.4:
+  - introduction of tricolor function
+  - prediction of multiple layers
+  - Y in function xyf now can also be a factor
+  - any element of the data argument in function supersom can now also
+    be a factor
+  - added new prediction examples for som, xyf and supersom
+  - uniform output of som, xyf and supersom functions
