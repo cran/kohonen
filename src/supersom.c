@@ -110,7 +110,7 @@ void supersom(double *data, double *codes,
     }
     
     /* find overall smallest distance */
-    nind = 0; dist = DOUBLE_XMAX;
+    nind = 0; dist = DOUBLE_XMAX; nearest = -1;
     for (cd = 0; cd < ncodes; cd++) {
       tmp = 0.0;
       for (l = 0; l < nmat; l++) 
@@ -127,9 +127,9 @@ void supersom(double *data, double *codes,
       }
     }
     
-    /*    fprintf(stderr, "\nWinning unit %d and distance %.5lf",
-	  nearest, dist); */
- 
+    if (nearest < 0)
+      error("No nearest neighbour found...");
+    
     /* linear decays for radius and learning parameter */
     threshold = radii[0] - (radii[0] - radii[1]) * (double) k / (double) niter;
     if (threshold < 1.0) threshold = 0.5;    
@@ -157,7 +157,7 @@ void supersom(double *data, double *codes,
 	  } 
 	}
 	
-	if (cd == nearest & nNA[i + l*n] > 0)
+	if ((cd == nearest) & (nNA[i + l*n] > 0))
 	  dist = dist * nvar[l] / (nvar[l] - nNA[i + l*n]);
       }
       

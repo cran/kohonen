@@ -65,18 +65,15 @@ void BDK_Eucl(double *data, double *Ys,
       if (ydists[cd] > maxy) maxy = ydists[cd];
     }
     
-    /* scale x and y distances so that largest value in both cases is 1 */
-    for (cd = 0; cd < ncodes; cd++) {
-      xdists[cd] /= maxx;
-      ydists[cd] /= maxy;
-    }
-
     /* distwght goes linearly to .5 during training */
     distwght = *xweight - (*xweight - 0.5) * k / niter; 
     
-    /* find nearest in x for updating Y */
-    nind = 0; dist = DOUBLE_XMAX;
+    /* scale x and y distances so that largest value in both cases is 1;
+       find nearest in x for updating Y */
+    nind = 0; dist = DOUBLE_XMAX; xnearest = -1;
     for (cd = 0; cd < ncodes; cd++) {
+      xdists[cd] /= maxx;
+      ydists[cd] /= maxy;
       tmp = distwght * xdists[cd] + (1.0 - distwght) * ydists[cd];
 
       if (tmp <= dist * (1 + EPS)) {
@@ -91,7 +88,7 @@ void BDK_Eucl(double *data, double *Ys,
     }
 
     /* find nearest in y for updating X */
-    nind = 0; dist = DOUBLE_XMAX;
+    nind = 0; dist = DOUBLE_XMAX; ynearest = -1;
     for (cd = 0; cd < ncodes; cd++) {
       tmp = (1.0 - distwght) * xdists[cd] + distwght * ydists[cd];
 
@@ -105,6 +102,9 @@ void BDK_Eucl(double *data, double *Ys,
 	dist = tmp;
       }
     }
+
+    if ((xnearest < 0) | (ynearest < 0))
+      error("No nearest neighbour found...");
 
     /* linear decays for radius and learning parameter */
     threshold = radii[0] - (radii[0] - radii[1]) * (double) k / (double) niter;
@@ -160,7 +160,7 @@ void BDK_Tani(double *data, double *Ys,
   int n = *pn, py = *ppy, px = *ppx, ncodes = *pncodes, rlen = *prlen;
   int cd, i, j, k, l, xnearest, ynearest, niter, nind;
   double dm, xdist, ydist, dist, tmp, maxx, maxy, distwght, 
-    alpha, threshold, decay;
+    alpha, threshold;
 
   RANDIN;
 
@@ -193,33 +193,45 @@ void BDK_Tani(double *data, double *Ys,
       ydists[cd] = tmp/(double)py;
     }
     
-    /* scale x and y distances so that largest value in both cases is 1 */
-    for (cd = 0; cd < ncodes; cd++) {
-      xdists[cd] /= maxx;
-    }
-
     /* distwght goes linearly to .5 during training */
     distwght = *xweight - (*xweight - 0.5) * k / niter; 
     
-    /* find nearest in x for updating Y */
-    dist = DOUBLE_XMAX;
+    /* scale x distance so that largest value is 1; automatically true
+       for Tanimoto distances; find nearest in x for updating Y */
+    nind = 0; dist = DOUBLE_XMAX; xnearest = -1;
     for (cd = 0; cd < ncodes; cd++) {
+      xdists[cd] /= maxx;
       tmp = distwght * xdists[cd] + (1.0 - distwght) * ydists[cd];
-      if (tmp < dist) {
+
+      if (tmp < dist * (1 + EPS)) {
+	if (tmp < dist * (1 - EPS)) {
+	  nind = 0;
+	  xnearest = cd;
+	} else {
+	  if(++nind * UNIF < 1.0) xnearest = cd;
+	}
 	dist = tmp;
-	xnearest = cd;
       }
     }
     
     /* find nearest in y for updating X */
-    dist = DOUBLE_XMAX;
+    nind = 0; dist = DOUBLE_XMAX; ynearest = -1;
     for (cd = 0; cd < ncodes; cd++) {
       tmp = (1.0 - distwght) * xdists[cd] + distwght * ydists[cd];
-      if (tmp < dist) {
+      
+      if (tmp <= dist * (1 + EPS)) {
+	if (tmp < dist * (1 - EPS)) {
+	  nind = 0;
+	  ynearest = cd;
+	} else {
+	  if(++nind * UNIF < 1.0) ynearest = cd;
+	}
 	dist = tmp;
-	ynearest = cd;
       }
     }
+    
+    if ((xnearest < 0) | (ynearest < 0))
+      error("No nearest neighbour found...");
 
     /* linear decays for radius and learning parameter */
     threshold = radii[0] - (radii[0] - radii[1]) * (double) k / (double) niter;

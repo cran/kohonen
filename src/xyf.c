@@ -68,7 +68,7 @@ void XYF_Eucl(double *data, double *Ys,
     
     /* scale x and y distances so that largest value in both cases is
        1, and sum to take total distance. Find smallest distance. */ 
-    nind = 0; dist = DOUBLE_XMAX;
+    nind = 0; dist = DOUBLE_XMAX; nearest = -1;
     for (cd = 0; cd < ncodes; cd++) {
       xdists[cd] /= maxx;
       ydists[cd] /= maxy;
@@ -85,8 +85,8 @@ void XYF_Eucl(double *data, double *Ys,
       }
     }
 
-    /*    fprintf(stderr, "\nWinning unit %d and distance %.5lf",
-	  nearest, dist); */
+    if (nearest < 0)
+      error("No nearest neighbour found...");
     
     /* linear decays for radius and learning parameter */
     threshold = radii[0] - (radii[0] - radii[1]) * (double) k / (double) niter;
@@ -140,7 +140,7 @@ void XYF_Tani(double *data, double *Ys,
 {
   int n = *pn, py = *ppy, px = *ppx, ncodes = *pncodes, rlen = *prlen;
   int cd, i, j, k, l, nearest, niter, nind;
-  double dm, xdist, ydist, dist, tmp, maxx, maxy, threshold, alpha, decay;
+  double dm, xdist, ydist, dist, tmp, maxx, maxy, threshold, alpha;
 
   RANDIN;
 
@@ -173,18 +173,28 @@ void XYF_Tani(double *data, double *Ys,
       ydists[cd] = tmp/(double)py;
     }
     
-    /* scale x and y distances so that largest value in both cases is
-       1, and sum to take total distance. Find smallest distance. */ 
-    dist = DOUBLE_XMAX;
+    /* scale x distance so that largest value is 1 (automatically 
+       true for Tanimoto), and sum to take total distance. Find 
+       smallest distance. */      
+    nind = 0; dist = DOUBLE_XMAX; nearest = -1;
     for (cd = 0; cd < ncodes; cd++) {
       xdists[cd] /= maxx;
       tmp = *xweight * xdists[cd] + (1.0 - *xweight) * ydists[cd];
-      if (tmp < dist) {
- 	dist = tmp;
- 	nearest = cd;
+
+      if (tmp <= dist * (1 + EPS)) {
+	if (tmp < dist * (1 - EPS)) {
+	  nind = 0;
+	  nearest = cd;
+	} else {
+	  if(++nind * UNIF < 1.0) nearest = cd;
+	}
+	dist = tmp;
       }
     }
     
+    if (nearest < 0)
+      error("No nearest neighbour found...");
+  
     threshold = radii[0] - (radii[0] - radii[1]) * (double) k / (double) niter;
     if (threshold < 1.0) threshold = 0.5;
     alpha = alphas[0] - (alphas[0] - alphas[1]) * (double)k/(double)niter;

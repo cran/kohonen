@@ -73,7 +73,7 @@ bdk(data, Y, grid=somgrid(), rlen = 100, alpha = c(0.05, 0.01),
 }
 
 \references{W.J. Melssen, R. Wehrens, and L.M.C. Buydens.
-\em{Chemom. Intell. Lab. Syst.}, 83, 99-113 (2006).}
+Chemom. Intell. Lab. Syst., 83, 99-113 (2006).}
 \author{Ron Wehrens}
 
 \seealso{\code{\link{som}}, \code{\link{xyf}},

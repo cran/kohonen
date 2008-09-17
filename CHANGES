@@ -34,3 +34,28 @@ Changes in version 2.0.4:
     be a factor
   - added new prediction examples for som, xyf and supersom
   - uniform output of som, xyf and supersom functions
+
+Changes in version 2.0.5:
+  - Changed title of the "quality" type plotting function to
+    "Distance" rather than "Similarity"
+  - Extra parameter "heatkeywidth" (thanks to Henning Rust) for
+    control over the size of the heatkey. Useful for cases with
+    multiple plots, and probably elsewhere too.
+  - Added plotting type "dist.neighbours" which shows Ultsch' U-matrix:
+    units are coloured according to the sum of the distances to their
+    immediate neighbours. A high distance can be interpreted as being
+    on a class boundary.
+  - Plotting types "quality", "dist.neighbours" and "counts" now
+    invisibly return what they show.
+  - Added information on the wine varieties, as well as a reference to
+    the original publication.
+  - Cleaned up C-code and man pages to eliminate warnings in the
+    development version of R 2.9.0
+
+Wishlist:
+  - more flexible definition of distances: should be user-definable
+    for every data layer.
+  - identify.kohonen function: should return unit numbers that are
+    clicked whether or not a colour bar is present. Is that possible
+    at all? Perhaps give exactly the same arguments as the plotting
+    function... 

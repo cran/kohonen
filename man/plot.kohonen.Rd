@@ -8,19 +8,20 @@
 \alias{plot.kohquality}
 \alias{plot.heatkey}
 \alias{plot.kohmapping}
+\alias{plot.kohUmatrix}
 \title{Plot kohonen object}
 \description{
   Plot self-organising map, obtained from function kohonen. Several types
   of plots are supported.
 }
 \usage{
-\method{plot}{kohonen}(x, type = c("codes", "changes", "counts", "mapping",
-                 "property", "quality"),
+\method{plot}{kohonen}(x, type = c("codes", "changes", "counts",
+                 "dist.neighbours", "mapping", "property", "quality"),
      classif = NULL, labels = NULL, pchs = NULL, main = NULL,
      palette.name = heat.colors, ncolors, bgcol = NULL,
      zlim = NULL, heatkey = TRUE, property, contin,
      whatmap = NULL, codeRendering = NULL, keepMargins = FALSE,
-     \dots) 
+     heatkeywidth = .2, \dots) 
 }
 \arguments{
   \item{x}{kohonen object.}
@@ -58,6 +59,9 @@
     graphical parameters after plotting the kohonen map. If \code{TRUE},
     one retains the map coordinate system so that one can add symbols to
     the plot, or map unit numbers using the \code{identify} function.}
+  \item{heatkeywidth}{width of the colour key; the default of 0.2 should
+    work in most cases but in some cases, e.g. when plotting multiple
+    figures, it may need to be adjusted.}
   \item{\dots}{other graphical parameters, e.g. colours of labels, or
     plotting symbols, in the "mapping" plotting type.}
 }
@@ -68,6 +72,11 @@
     \item{"codes"}{shows the codebook vectors.}
     \item{"counts"}{shows the number of objects mapped to the
       individual units. Empty units are depicted in gray.}
+    \item{"dist.neighbours"}{shows the sum of the distances to all
+      immediate neighbours. This kind of visualisation is also known as
+      a U-matrix plot. Units near a class boundary can be expected to
+      have higher average distances to their neighbours. Only available
+      for the "som" and "supersom" maps, for the moment.}
     \item{"mapping"}{shows where objects are mapped. It
       needs the "classif" argument, and a "labels" or "pchs"
       argument.}
@@ -77,8 +86,10 @@
       similarity of all units and the objects mapped to them,
       etcetera. The parameter \code{property} contains the numerical
       values. See examples below.}
-    \item{"quality"}{shows the mean similarity of objects mapped to a
-      unit to the codebook vector of that unit.}
+    \item{"quality"}{shows the mean distance of objects mapped to a
+      unit to the codebook vector of that unit. The smaller the
+      distances, the better the objects are represented by the codebook
+      vectors.}
   }
 }
 

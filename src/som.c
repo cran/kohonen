@@ -28,7 +28,7 @@ void SOM_online(double *data, double *codes, double *nhbrdist,
     i = (int)(n * UNIF);
 
     /* find the nearest code 'near' */
-    nind = 0; dm = DOUBLE_XMAX;
+    nind = 0; dm = DOUBLE_XMAX; nearest = -1;
     for (cd = 0; cd < ncodes; cd++) {
       dist = 0.0;
       for (j = 0; j < p; j++) {
@@ -47,16 +47,19 @@ void SOM_online(double *data, double *codes, double *nhbrdist,
       }
     }
 
+    if (nearest < 0)
+      error("No nearest neighbour found...");
+    
     /* update all codes within threshold of 'nearest'. Linear decrease
        for both radius and learning parameter. */ 
     threshold = radii[0] - (radii[0] - radii[1]) * (double)k/(double)niter;
     if (threshold < 1.0) threshold = 0.5;
     alpha = alphas[0] - (alphas[0] - alphas[1]) * (double)k/(double)niter;
 
+    l = (int)(k/n);
+
     for (cd = 0; cd < ncodes; cd++) {
       if(nhbrdist[cd + ncodes*nearest] > threshold) continue;
-
-      if (cd == nearest) l = (int)(k/n);
 
       for(j = 0; j < p; j++) {
 	tmp = data[i + j*n] - codes[cd + j*ncodes];

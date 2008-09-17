@@ -1,3 +1,6 @@
+### Version 2.0.5: added parameter heatkeywidth (suggestion by Henning
+### Rust). Especially useful for multiple plots in one figure.
+
 ### Parameter 'main' is mentioned explicitly since in most cases the
 ### default leaves open ugly space above the plot. We explicitly put
 ### it 1.2 units above the top row using 'text', if this is within the
@@ -19,31 +22,44 @@
 
 "plot.kohonen" <- function (x,
                             type = c("codes", "changes", "counts",
-                              "mapping", "property", "quality"),
+                              "dist.neighbours", "mapping", "property",
+                              "quality"),
                             classif = NULL,
                             labels = NULL, pchs = NULL, main = NULL,
                             palette.name = heat.colors, ncolors,
                             bgcol=NULL, zlim = NULL, heatkey = TRUE,
                             property, contin, whatmap = NULL,
                             codeRendering = NULL, keepMargins = FALSE,
-                            ...)
+                            heatkeywidth = .2, ...)
 {
   type <- match.arg(type)
 
   switch(type,
-         mapping = plot.kohmapping(x, classif, main,
-           labels, pchs, bgcol, keepMargins, ...),
-         property = plot.kohprop(x, property, main,
-           palette.name, ncolors, zlim, heatkey, contin, keepMargins, ...),
-         codes = plot.kohcodes(x, main, bgcol, whatmap, codeRendering,
-           keepMargins, ...),
-         quality = plot.kohquality(x, classif, main,
-           palette.name, ncolors, zlim, heatkey,keepMargins, ...),
-         counts = plot.kohcounts(x, classif, main,
-           palette.name, ncolors, zlim, heatkey, keepMargins, ...),
-         changes = plot.kohchanges(x, main, keepMargins, ...))
-
-  invisible()
+         mapping = plot.kohmapping(x = x, classif = classif,
+           main = main, labels = labels, pchs = pchs,
+           bgcol = bgcol, keepMargins = keepMargins, ...),
+         property = plot.kohprop(x = x, property, main = main,
+           palette.name = palette.name, ncolors = ncolors,
+           zlim = zlim, heatkey = heatkey,
+           contin = contin, keepMargins = keepMargins, 
+           heatkeywidth = heatkeywidth, ...),
+         codes = plot.kohcodes(x = x, main = main, bgcol = bgcol,
+           whatmap = whatmap, codeRendering = codeRendering,
+           keepMargins = keepMargins, ...),
+         quality = plot.kohquality(x = x, classif = classif, main = main,
+           palette.name = palette.name, ncolors = ncolors,
+           zlim = zlim, heatkey = heatkey, keepMargins = keepMargins, 
+           heatkeywidth = heatkeywidth, ...),
+         counts = plot.kohcounts(x = x, classif = classif, main = main,
+           palette.name = palette.name, ncolors = ncolors,
+           zlim = zlim, heatkey = heatkey, keepMargins = keepMargins,
+           heatkeywidth = heatkeywidth, ...),
+         changes = plot.kohchanges(x = x, main = main,
+           keepMargins = keepMargins, ...),
+         dist.neighbours = plot.kohUmatrix(x = x, main = main,
+           palette.name = palette.name, ncolors = ncolors,
+           zlim = zlim, heatkey = heatkey, keepMargins = keepMargins,
+           heatkeywidth = heatkeywidth, ...))
 }
 
 
@@ -61,13 +77,10 @@ plot.somgrid <- function(x, xlim, ylim, ...)
   if (missing(ylim)) ylim <-  c(max(x$pts[,2]) + min(x$pts[,2]), 0)
   MASS::eqscplot(xlim, ylim, axes = FALSE,
                  type = "n", xlab = "", ylab = "", ...)
-
-  invisible()
 }
 
 
 ### Adapted for version 2.0: April 11.
-### Checked: nope
 
 plot.kohmapping <- function(x, classif, main, labels, pchs, bgcol,
                             keepMargins, ...)
@@ -114,6 +127,9 @@ plot.kohmapping <- function(x, classif, main, labels, pchs, bgcol,
     text(x$grid$pts[classif, 1] + rnorm(length(classif), 0, 0.12),
          x$grid$pts[classif, 2] + rnorm(length(classif), 0, 0.12),
          labels, ...)
+
+
+  invisible()
 }
 
 
@@ -121,7 +137,8 @@ plot.kohmapping <- function(x, classif, main, labels, pchs, bgcol,
 ### Checked: nope
 
 plot.kohprop <- function(x, property, main, palette.name, ncolors,
-                         zlim, heatkey, contin, keepMargins, ...)
+                         zlim, heatkey, contin, keepMargins,
+                         heatkeywidth, ...)
 {
   if (is.null(main)) main <- "Property plot"
   
@@ -173,11 +190,14 @@ plot.kohprop <- function(x, property, main, palette.name, ncolors,
   if (heatkey) {
     if (length(unique(property)) < 10 & !contin) {
       plot.heatkey(x, zlim, bgcol, labels = levels(as.factor(property)),
-                   contin = contin, ...)
+                   contin = contin, heatkeywidth = heatkeywidth, ...)
     } else {
-      plot.heatkey(x, zlim, bgcol, labels = NULL, contin = contin, ...)
+      plot.heatkey(x, zlim, bgcol, labels = NULL, contin = contin,
+                   heatkeywidth = heatkeywidth, ...)
     }
   }
+
+  invisible()
 }
 
 
@@ -234,6 +254,8 @@ plot.kohchanges <- function(x, main, keepMargins, ...)
   ## plot the legend
   if (nmaps > 1)
     legend("topright", legend = varnames, lty=1, col = 1:nmaps, bty="n") 
+
+  invisible()
 }
 
 
@@ -241,7 +263,7 @@ plot.kohchanges <- function(x, main, keepMargins, ...)
 ### Checked: April 13.
 
 plot.kohcounts <- function(x, classif, main, palette.name, ncolors,
-                           zlim, heatkey, keepMargins, ...)
+                           zlim, heatkey, keepMargins, heatkeywidth, ...)
 {
   if (is.null(main)) main <- "Counts plot"
   
@@ -264,7 +286,54 @@ plot.kohcounts <- function(x, classif, main, palette.name, ncolors,
   plot.kohprop(x, property = counts, main = main,
                palette.name = palette.name, ncolors = ncolors,
                zlim = zlim, heatkey = heatkey, contin = contin,
-               keepMargins = keepMargins, ...)
+               keepMargins = keepMargins, heatkeywidth = heatkeywidth, ...)
+
+  invisible(counts)
+}
+
+### Introduced for version 2.0.5: Jan 16, 2009
+
+plot.kohUmatrix <- function(x, classif, main, palette.name, ncolors,
+                            zlim, heatkey, keepMargins, heatkeywidth, ...)
+{
+  if (x$method != "som" & x$method != "supersom")
+    stop("Neighbour distance plot only implemented for (super)som")
+  
+  if (is.null(main)) main <- "Neighbour distance plot"
+  
+  nhbrdist <- as.matrix(unit.distances(x$grid, x$toroidal))
+  nhbrdist[nhbrdist > 1.05] <- NA
+  if (x$method == "som") {
+    for (i in 2:nrow(nhbrdist)) {
+      for (j in 1:(i - 1)) {
+        if (!is.na(nhbrdist[i,j]))
+          nhbrdist[i,j] <- nhbrdist[j,i] <- dist(x$codes[c(i,j),])
+      }
+    }
+  } else {
+    if (x$method == "supersom") { # superfluous check, really
+      nhbrdist[!is.na(nhbrdist)] <- 0
+      for (k in 1:length(x$data)) {
+        for (i in 2:nrow(nhbrdist)) {
+          for (j in 1:(i - 1)) {
+            if (!is.na(nhbrdist[i,j]))
+              nhbrdist[i,j] <- nhbrdist[i,j] +
+                x$weights[k] * dist(x$codes[[k]][c(i,j),])
+          }
+        }
+        
+        nhbrdist[j,i] <- nhbrdist[i,j]
+      }
+    }
+  }
+
+  neigh.dists <- colSums(nhbrdist, na.rm = TRUE)
+  plot.kohprop(x, property = neigh.dists, main = main,
+               palette.name = palette.name, ncolors = ncolors,
+               zlim = zlim, heatkey = heatkey, contin = TRUE,
+               keepMargins = keepMargins, heatkeywidth = heatkeywidth, ...)
+
+  invisible(neigh.dists)
 }
 
 ### Newly written for version 2.0, August 30 2007.
@@ -273,7 +342,7 @@ plot.kohcounts <- function(x, classif, main, palette.name, ncolors,
 plot.kohquality <- function(x, classif, main, palette.name, ncolors,
                             zlim, heatkey, keepMargins, ...)
 {
-  if (is.null(main)) main <- "Similarity plot"
+  if (is.null(main)) main <- "Distance plot"
 
   distances <- NULL
   if (is.null(classif) & !is.null(x$unit.classif)) {
@@ -298,6 +367,8 @@ plot.kohquality <- function(x, classif, main, palette.name, ncolors,
                palette.name = palette.name, ncolors = ncolors,
                zlim = zlim, heatkey = heatkey, contin = TRUE,
                keepMargins = keepMargins, ...)
+
+  invisible(similarities)
 }
 
 
@@ -480,16 +551,17 @@ plot.kohcodes <- function(x, main, bgcol, whatmap, codeRendering,
 }
 
 
-### Unchanged in version 2.0
+### Added heatkeywidth parameter in version 2.0.5 (contribution by
+### Henning Rust)
 
-plot.heatkey <- function (x, zlim, bgcol, labels, contin, ...)
+plot.heatkey <- function (x, zlim, bgcol, labels, contin, heatkeywidth, ...)  
 {
   ncolors <- length(bgcol)
   
   yrange <- range(x$grid$pts[, 2])
   smallestx <- min(x$grid$pts[,1])
   ## A width of .2 looks OK on my screen
-  xleft <- c(smallestx - 1.2, smallestx - 1)
+  xleft <- c(smallestx - heatkeywidth, smallestx) - 1
   yleft <- seq(yrange[1] - 0.5,
                yrange[2] + 0.5,
                length = ncolors + 1)

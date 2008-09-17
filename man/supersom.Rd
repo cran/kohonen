@@ -17,7 +17,7 @@ supersom(data, grid=somgrid(), rlen = 100, alpha = c(0.05, 0.01),
 
 \arguments{
   \item{data}{list of data matrices.}
-  \item{grid}{a grid for the representatives: see \code{\link{somgrid}}.}
+  \item{grid}{a grid for the representatives: see \code{\link[class]{somgrid}}.}
   \item{rlen}{the number of times the complete data set will be
     presented to the network.}
   \item{alpha}{learning rate, a vector of two numbers indicating the
@@ -57,7 +57,7 @@ supersom(data, grid=somgrid(), rlen = 100, alpha = c(0.05, 0.01),
     only returned if \code{keep.data == TRUE}.}
   \item{distances}{distances of objects to their corresponding winning
     unit, only returned if \code{keep.data == TRUE}.}
-  \item{grid}{the grid, an object of class \code{\link{somgrid}}.}
+  \item{grid}{the grid, an object of class \code{\link[class]{somgrid}}.}
   \item{codes}{a list of matrices containing codebook vectors.}
   \item{changes}{matrix of mean average deviations from code vectors;
     every map corresponds with one column.}
@@ -75,7 +75,7 @@ supersom(data, grid=somgrid(), rlen = 100, alpha = c(0.05, 0.01),
 \references{R. Wehrens and L.M.C. Buydens, J. Stat. Softw. 21 (5), 2007}
 \author{Ron Wehrens}
 
-\seealso{\code{\link{somgrid}}, \code{\link{plot.kohonen}}}
+\seealso{\code{\link[class]{somgrid}}, \code{\link{plot.kohonen}}}
 \examples{
 data(yeast)
 yeast.supersom <- supersom(yeast, somgrid(6, 6, "hexagonal"), whatmap = 3:6)
