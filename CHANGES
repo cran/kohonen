@@ -52,10 +52,14 @@ Changes in version 2.0.5:
   - Cleaned up C-code and man pages to eliminate warnings in the
     development version of R 2.9.0
 
+Changes in version 2.0.6:
+  - Added palette.name as argument to plot.kohcode
+  - Function-specific default palettes
+  - Changed contact address to ron.wehrens at iasma.it
+  - Added visualisation of clustering of units (Leo Lopes)
+
 Wishlist:
   - more flexible definition of distances: should be user-definable
     for every data layer.
   - identify.kohonen function: should return unit numbers that are
-    clicked whether or not a colour bar is present. Is that possible
-    at all? Perhaps give exactly the same arguments as the plotting
-    function... 
+    clicked whether or not a colour bar is present.

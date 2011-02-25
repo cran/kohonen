@@ -99,6 +99,7 @@
   codes <- list(X = matrix(res$codes, nrow(init), ncol(init)),
                 Y = matrix(res$codeYs, ng, ny))
   colnames(codes$Y) <- colnames(YY)
+  colnames(codes$X) <- colnames(data)
 
   if (keep.data) {
     mapping <- map.kohonen(list(codes = codes),

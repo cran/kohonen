@@ -26,7 +26,6 @@ data(wines)
 
 kohmap <- som(wines, grid = somgrid(5, 5, "hexagonal"), rlen=10)
 
-par(mfrow=c(1,2))
 dists <- unit.distances(kohmap$grid, toroidal=FALSE)
 plot(kohmap, type="property", property=dists[1,],
      main="Distances to unit 1", zlim=c(0,6),
@@ -38,7 +37,6 @@ plot(kohmap, type="property", property=dists[1,],
 
 kohmap <- som(wines, grid = somgrid(5, 5), rlen=10)
 
-par(mfrow=c(1,2))
 dists <- unit.distances(kohmap$grid, toroidal=FALSE)
 plot(kohmap, type="property", property=dists[1,],
      main="Distances to unit 1", zlim=c(0,4),

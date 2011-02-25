@@ -1,11 +1,11 @@
 Package: kohonen
-Version: 2.0.5
-Date: 17/09/2008
+Version: 2.0.6
 Title: Supervised and unsupervised self-organising maps
 Author: Ron Wehrens
-Maintainer: Ron Wehrens <r.wehrens@science.ru.nl>
+Maintainer: Ron Wehrens <ron.wehrens@iasma.it>
 Description: Supervised and unsupervised self-organising maps
 License: GPL (>= 2)
-Depends: class
-Suggests: MASS
-Packaged: Tue Jan 27 14:42:41 2009; rwehrens
+Depends: class, MASS
+Packaged: 2011-02-25 11:15:08 UTC; ron
+Repository: CRAN
+Date/Publication: 2011-02-26 08:22:13

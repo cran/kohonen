@@ -79,24 +79,6 @@ Chemom. Intell. Lab. Syst., 83, 99-113 (2006).}
 \seealso{\code{\link{som}}, \code{\link{xyf}},
   \code{\link{plot.kohonen}}, \code{\link{predict.kohonen}}}
 \examples{
-### Simulated example
-library(MASS)
-
-csize <- 15
-c1 <- mvrnorm(csize, mu=c(5,3,4),
-              Sigma=matrix(c(2, 0,0,0, 2, 1, 0, 1, 2),3,3))
-c2 <- mvrnorm(csize, mu=c(5.5, 3.5, 4.5),
-              Sigma=matrix(c(2, 0,0,0, 2, 1, 0, 1, 2),3,3))
-c3 <- mvrnorm(csize, mu=c(0,0,0),
-              Sigma=matrix(c(2, 0,0,0, 2, 1, 0, 1, 2),3,3))
-
-X <- rbind(c1, c2, c3)
-classes <- c(rep(1, csize), rep(2, csize), rep(3, csize))
-
-bdkmap <- bdk(X, classvec2classmat(classes), somgrid(4, 4, "hexagonal"))
-plot(bdkmap, "mapping", pch=rep(1:3, rep(15, 3)), col=rep(1:3, rep(15, 3)))
-
-
 ### Wine example
 data(wines)
 set.seed(7)

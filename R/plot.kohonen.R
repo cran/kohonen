@@ -1,3 +1,4 @@
+### $Id: plot.kohonen.R 6 2011-02-24 16:36:34Z ron.wehrens@gmail.com $
 ### Version 2.0.5: added parameter heatkeywidth (suggestion by Henning
 ### Rust). Especially useful for multiple plots in one figure.
 
@@ -7,17 +8,8 @@
 ### par("usr") range. Else, we use the standard 'title' command.
 
 ### Addition 04/11/07: keepMargins, codeRendering and whatmap arguments.
-### Decisions to take: * what to do with the "prediction" plot (not
-###                      for supersom). Let's eliminate it for the moment.
-###                    * what to do with the whatmap argument for
-###                      non-supersom maps (simply ignore?)
-###                    * Do we need a separate supersom class?
-
 ### Adapted for version 2.0: April 11, 2007
-### Checked: nope
-
 ### Added quality plot, August 30 2007.
-
 ### Added default titles, August 31 2007.
 
 "plot.kohonen" <- function (x,
@@ -26,7 +18,7 @@
                               "quality"),
                             classif = NULL,
                             labels = NULL, pchs = NULL, main = NULL,
-                            palette.name = heat.colors, ncolors,
+                            palette.name = NULL, ncolors,
                             bgcol=NULL, zlim = NULL, heatkey = TRUE,
                             property, contin, whatmap = NULL,
                             codeRendering = NULL, keepMargins = FALSE,
@@ -43,7 +35,8 @@
            zlim = zlim, heatkey = heatkey,
            contin = contin, keepMargins = keepMargins, 
            heatkeywidth = heatkeywidth, ...),
-         codes = plot.kohcodes(x = x, main = main, bgcol = bgcol,
+         codes = plot.kohcodes(x = x, main = main,
+           palette.name = palette.name, bgcol = bgcol,
            whatmap = whatmap, codeRendering = codeRendering,
            keepMargins = keepMargins, ...),
          quality = plot.kohquality(x = x, classif = classif, main = main,
@@ -141,6 +134,7 @@ plot.kohprop <- function(x, property, main, palette.name, ncolors,
                          heatkeywidth, ...)
 {
   if (is.null(main)) main <- "Property plot"
+  if (is.null(palette.name)) palette.name <- heat.colors
   
   margins <- rep(0.6, 4)
   if (heatkey) margins[2] <- margins[2] + 4
@@ -266,6 +260,7 @@ plot.kohcounts <- function(x, classif, main, palette.name, ncolors,
                            zlim, heatkey, keepMargins, heatkeywidth, ...)
 {
   if (is.null(main)) main <- "Counts plot"
+  if (is.null(palette.name)) palette.name <- heat.colors
   
   if (is.null(classif) & !is.null(x$unit.classif)) {
     classif <- x$unit.classif
@@ -300,8 +295,9 @@ plot.kohUmatrix <- function(x, classif, main, palette.name, ncolors,
     stop("Neighbour distance plot only implemented for (super)som")
   
   if (is.null(main)) main <- "Neighbour distance plot"
-  
-  nhbrdist <- as.matrix(unit.distances(x$grid, x$toroidal))
+  if (is.null(palette.name)) palette.name <- heat.colors
+
+  nhbrdist <- unit.distances(x$grid, x$toroidal)
   nhbrdist[nhbrdist > 1.05] <- NA
   if (x$method == "som") {
     for (i in 2:nrow(nhbrdist)) {
@@ -343,6 +339,7 @@ plot.kohquality <- function(x, classif, main, palette.name, ncolors,
                             zlim, heatkey, keepMargins, ...)
 {
   if (is.null(main)) main <- "Distance plot"
+  if (is.null(palette.name)) palette.name <- heat.colors
 
   distances <- NULL
   if (is.null(classif) & !is.null(x$unit.classif)) {
@@ -375,15 +372,18 @@ plot.kohquality <- function(x, classif, main, palette.name, ncolors,
 ### Adapted for version 2.0: April 11.
 ### Checked: April 13.
 ### New elements: whatmap, codeRendering, keepMargins, legend
+### Added palette.name for version 2.0.6. Aug 3, 2010.
 
-plot.kohcodes <- function(x, main, bgcol, whatmap, codeRendering,
-                          keepMargins, ...)
+plot.kohcodes <- function(x, main, palette.name, bgcol, whatmap,
+                          codeRendering, keepMargins, ...)
 {
   if (!keepMargins) {
     opar <- par(c("mar", "ask"))
     on.exit(par(opar))
   }
 
+  if (is.null(palette.name)) palette.name <- terrain.colors
+  
   whatmap <- check.whatmap(x, whatmap)
   nmaps <- length(whatmap)
   
@@ -429,7 +429,8 @@ plot.kohcodes <- function(x, main, bgcol, whatmap, codeRendering,
         }
       }
 
-      plot.kohcodes(huhn, main = main.title, bgcol=bgcol, whatmap = NULL,
+      plot.kohcodes(huhn, main = main.title, palette.name = palette.name,
+                    bgcol=bgcol, whatmap = NULL,
                     codeRendering = cR, keepMargins = TRUE, ...)
     }
   } else {
@@ -464,7 +465,7 @@ plot.kohcodes <- function(x, main, bgcol, whatmap, codeRendering,
                            legend = colnames(codes),
                            cex=cex, plot=FALSE,
                            ncol = min(maxlegendcols, nvars),
-                           fill = rainbow(nvars))
+                           fill = palette.name(nvars))
       while (leg.result$rect$w > plot.width) {
         cex <- cex*0.9 # if too large, decrease text size
         leg.result <- legend(x = mean(x$grid$pts[,1]), xjust = 0.5,
@@ -472,14 +473,14 @@ plot.kohcodes <- function(x, main, bgcol, whatmap, codeRendering,
                              legend = colnames(codes),
                              cex=cex, plot=FALSE,
                              ncol = min(maxlegendcols, nvars),
-                             fill = rainbow(nvars))
+                             fill = palette.name(nvars))
       } # until it fits!
 
       leg.result <- legend(x = mean(x$grid$pts[,1]), xjust = 0.5,
                            y = 0, yjust = 1, cex=cex,
                            legend = colnames(codes), plot=FALSE,
                            ncol = min(maxlegendcols, nvars),
-                           fill = rainbow(nvars), ...)
+                           fill = palette.name(nvars), ...)
 
       par(mfg = current.plot)
       plot(x$grid, 
@@ -490,7 +491,7 @@ plot.kohcodes <- function(x, main, bgcol, whatmap, codeRendering,
              y = 0, yjust = 1, cex=cex, plot = TRUE,
              legend = colnames(codes),
              ncol = min(maxlegendcols, nvars),
-             fill = rainbow(nvars), ...)
+             fill = palette.name(nvars), ...)
     } else {
       plot(x$grid, ...)
     }
@@ -520,9 +521,9 @@ plot.kohcodes <- function(x, main, bgcol, whatmap, codeRendering,
 
     switch(codeRendering,
            segments = {
-             stars(codes, location = x$grid$pts,
+             stars(codes, locations = x$grid$pts,
                    labels = NULL, len = 0.4,
-                   add=TRUE, col.segments=rainbow(nvars),
+                   add=TRUE, col.segments=palette.name(nvars),
                    draw.segments=TRUE)
            },             
            lines = {
@@ -541,7 +542,7 @@ plot.kohcodes <- function(x, main, bgcol, whatmap, codeRendering,
                      col = "red")
              }
            },
-           stars = stars(codes, location = x$grid$pts,
+           stars = stars(codes, locations = x$grid$pts,
              labels = NULL, len = 0.4, add=TRUE)
            )
     
@@ -589,5 +590,98 @@ plot.heatkey <- function (x, zlim, bgcol, labels, contin, heatkeywidth, ...)
          yleft[-1] - 0.5*diff(yleft[1:2]),
          sort(labels),
          xpd = TRUE, adj=1, cex=cex)
+  }
+}
+
+### Show cluster boundaries additional to one of the map plots
+### Additional arguments may be col. Based on code from Leo Lopes.
+
+add.cluster.boundaries <- function(x, cluster, lwd = 5, ...) {
+  nhbrdist <- unit.distances(x$grid, x$toroidal)
+  neighbours <- apply(nhbrdist, 1, function(y) which(y > .95 & y < 1.05))
+  ## which neighbours are in a different cluster?
+  neighbours.diffclass <-
+    lapply(1:length(neighbours),
+           function(i, y, class) y[[i]][(class[y[[i]]] != class[i])],
+           neighbours, cluster)
+  ## avoid counting differences twice
+  neighbours.diffclass2 <-
+    lapply(1:length(neighbours),
+           function(i, y) y[[i]][y[[i]] > i],
+           neighbours.diffclass)
+
+  ## Function to actually plot the boundaries. u1 always larger than
+  ## u2, so we only need to check E, NE and NW for hexagonal maps, and
+  ## E, NE, N and NW for rectangular maps
+  plot.boundary <- function(u1, u2, grid, lwd, ...) {
+    dloc <- grid$pts[u1,] - grid$pts[u2,]
+    
+    if (grid$topo == "hexagonal") {
+      angle <- 2 * pi/3                  ## NW
+      if (dloc[2] < .1) {                ## E
+        angle <- 0
+      } else {
+        if (dloc[1] > .1) angle <- pi/3  ## NE
+      }
+
+      radius <- .5/cos(pi/6)             ## horizontal unit distance always 1
+      segments(grid$pts[u2,1]+radius*cos(angle-pi/6),
+               grid$pts[u2,2]+radius*sin(angle-pi/6), 
+               grid$pts[u2,1]+radius*cos(angle+pi/6),
+               grid$pts[u2,2]+radius*sin(angle+pi/6),
+               lwd = lwd, ...)  
+    } else { ## slightly different use of angle here
+      angle <- 2                         ## NE
+      if (abs(dloc[1]) < .1) {
+        angle <- 3                       ## N
+      } else {
+        if (abs(dloc[2]) < .1) {
+          angle <- 1                     ## E
+        } else {
+          if (dloc[1] < 0) {
+            angle <- 4                   ## NW
+          }
+        }
+      }
+
+      boundary <- switch(angle,
+                         "1" = { ## E
+                           x0 <- x1 <- grid$pts[u2,1] + .5
+                           y0 <- grid$pts[u2,2] - .3
+                           y1 <- y0 + .6
+                           list(x0, y0, x1, y1)
+                         },
+                         "2" = { ## NE
+                           x0 <- c(grid$pts[u2,1] + .5, grid$pts[u2,1] + .3)
+                           x1 <- x0 + .2
+                           y0 <- c(grid$pts[u2,2] + .7, grid$pts[u2,2] + .5)
+                           y1 <- y0 - .2
+                           list(x0, y0, x1, y1)
+                         } ,
+                         "3" = { ## N
+                           y0 <- y1 <- grid$pts[u2,2] + .5
+                           x0 <- grid$pts[u2,1] - .3
+                           x1 <- x0 + .6
+                           list(x0, y0, x1, y1)
+                           },
+                         "4" = { ## NW
+                           x0 <- c(grid$pts[u2,1] - .7, grid$pts[u2,1] - .5)
+                           x1 <- x0 + .2
+                           y0 <- c(grid$pts[u2,2] + .5, grid$pts[u2,2] + .3)
+                           y1 <- y0 + .2
+                           list(x0, y0, x1, y1)
+                         })
+      ## Go!
+      segments(x0 = boundary[[1]], y0 = boundary[[2]],
+               x1 = boundary[[3]], y1 = boundary[[4]],
+               lwd = lwd, ...)
+    }
+  }
+  
+  for (i in 1:length(neighbours)) {
+    if (length(neighbours.diffclass2[[i]]) > 0)
+      sapply(neighbours.diffclass2[[i]],
+             function(ii, j) plot.boundary(ii, j, x$grid, lwd = lwd, ...),
+             i)
   }
 }
