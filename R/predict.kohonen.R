@@ -84,13 +84,7 @@
           unit.predictions[[ii]] <- matrix(NA, nrow(object$grid$pts), nY[ii])
           huhn <- aggregate(trainY[[ii]], by = list(cl = trainingMapping),
                             mean)
-          ## From 2.6.0 on, this should change... Hrmpfff.
-          if (R.version$major <= "2" & R.version$minor < "6.0") {
-            unit.predictions[[ii]][sort(as.numeric(levels(huhn[, 1]))),] <-
-              as.matrix(huhn[, -1])
-          } else {
-            unit.predictions[[ii]][huhn[,1],] <- as.matrix(huhn[,-1])
-          }
+          unit.predictions[[ii]][huhn[,1],] <- as.matrix(huhn[,-1])
           
           ## Prediction for empty units
           nas <- which(apply(unit.predictions[[ii]],

@@ -1,4 +1,4 @@
-### $Id: plot.kohonen.R 6 2011-02-24 16:36:34Z ron.wehrens@gmail.com $
+### $Id: plot.kohonen.R 7 2011-02-25 11:18:24Z ron.wehrens@gmail.com $
 ### Version 2.0.5: added parameter heatkeywidth (suggestion by Henning
 ### Rust). Especially useful for multiple plots in one figure.
 
