@@ -58,6 +58,12 @@ Changes in version 2.0.6:
   - Changed contact address to ron.wehrens at iasma.it
   - Added visualisation of clustering of units (Leo Lopes)
 
+Changes in version 2.0.8:
+  - changed contact email address once again to fmach.it
+  - added name space
+  - compressed documentation file kohonen-manual.pdf
+
+
 Wishlist:
   - more flexible definition of distances: should be user-definable
     for every data layer.
