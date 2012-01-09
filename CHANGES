@@ -63,6 +63,10 @@ Changes in version 2.0.8:
   - added name space
   - compressed documentation file kohonen-manual.pdf
 
+Changes in version 2.0.8:
+  - Added useDynLib directive to NAMESPACE for compatibility with
+    older R versions
+
 
 Wishlist:
   - more flexible definition of distances: should be user-definable

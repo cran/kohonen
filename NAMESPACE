@@ -4,6 +4,8 @@
 # Export all names
 exportPattern(".")
 
+useDynLib(kohonen)
+
 # Import all packages listed as Imports or Depends
 import(
   class,
