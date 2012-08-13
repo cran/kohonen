@@ -1,4 +1,4 @@
-### $Id: plot.kohonen.R 7 2011-02-25 11:18:24Z ron.wehrens@gmail.com $
+### $Id: plot.kohonen.R 16 2012-08-10 14:56:38Z ron.wehrens@gmail.com $
 ### Version 2.0.5: added parameter heatkeywidth (suggestion by Henning
 ### Rust). Especially useful for multiple plots in one figure.
 
@@ -437,14 +437,9 @@ plot.kohcodes <- function(x, main, palette.name, bgcol, whatmap,
     codes <- x$codes
     nvars <- ncol(codes)
     
-    if (is.null(codeRendering)) { ## defaults
-      if (nvars < 15) {
-        codeRendering <- "segments"
-        maxlegendcols <- 3
-      } else {
-        codeRendering <- "lines"
-      }
-    }
+    maxlegendcols <- 3  ## nr of columns for the legend
+    if (is.null(codeRendering))  ## use default
+      codeRendering <- ifelse(nvars < 15, "segments", "lines")
     
     margins <- rep(0.6, 4)  # no text annotation anywhere
     if (!is.null(main))
@@ -629,8 +624,8 @@ add.cluster.boundaries <- function(x, cluster, lwd = 5, ...) {
                grid$pts[u2,2]+radius*sin(angle-pi/6), 
                grid$pts[u2,1]+radius*cos(angle+pi/6),
                grid$pts[u2,2]+radius*sin(angle+pi/6),
-               lwd = lwd, ...)  
-    } else { ## slightly different use of angle here
+               lwd = lwd, xpd = NA, ...)  
+    } else { ## "rectangular", slightly different use of angle here
       angle <- 2                         ## NE
       if (abs(dloc[1]) < .1) {
         angle <- 3                       ## N
@@ -674,7 +669,7 @@ add.cluster.boundaries <- function(x, cluster, lwd = 5, ...) {
       ## Go!
       segments(x0 = boundary[[1]], y0 = boundary[[2]],
                x1 = boundary[[3]], y1 = boundary[[4]],
-               lwd = lwd, ...)
+               lwd = lwd, xpd = NA, ...)
     }
   }
   

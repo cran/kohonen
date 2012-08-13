@@ -63,10 +63,15 @@ Changes in version 2.0.8:
   - added name space
   - compressed documentation file kohonen-manual.pdf
 
-Changes in version 2.0.8:
+Changes in version 2.0.9:
   - Added useDynLib directive to NAMESPACE for compatibility with
     older R versions
 
+Changes in version 2.0.10:
+  - added xpd = NA to add.cluster.boundaries so that also segments
+    outside the official plotting area are shown
+  - added an example for component planes (suggestion by Andreas Henelius)
+  - fixed a bug concerning maxlegendcols (spotted by Andreas Henelius)
 
 Wishlist:
   - more flexible definition of distances: should be user-definable

@@ -126,9 +126,13 @@ plot(kohmap, type="mapping", col = wine.classes+1,
      pchs = wine.classes, bgcol = bgcols[as.integer(xyfpredictions)], 
      main = "another mapping plot")
 
-## Another way to show clustering information
+## Show 'component planes'
 set.seed(7)
-sommap <- som(scale(wines),grid = somgrid(6, 4, "hexagonal"))
+sommap <- som(scale(wines), grid = somgrid(6, 4, "hexagonal"))
+plot(sommap, type = "property", property = sommap$codes[,1],
+     main = colnames(sommap$codes)[1])
+
+## Another way to show clustering information
 plot(sommap, type="dist.neighbours", main = "SOM neighbour distances")
 ## use hierarchical clustering to cluster the codebook vectors
 som.hc <- cutree(hclust(dist(sommap$codes)), 5)

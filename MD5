@@ -1,11 +1,11 @@
-22fdf7bbf0642d80657846cbe643d1c4 *CHANGES
-1fb0278dcbfef509601ef275f8503604 *DESCRIPTION
+a65ea60cd865ab3b3ca2c08e8910e806 *CHANGES
+4f212fd8adfe024b3729dd7b3da47e19 *DESCRIPTION
 9c45759409000a4097555af35a8ffe46 *NAMESPACE
 07112dc85cd078d7954389157e93c610 *R/bdk.R
 f8872ae6c6f57e47d1b1b626e621c25f *R/check.whatmap.R
 6cc0a5ca02ea151088c24bbf420ab060 *R/classvec2classmat.R
 c33fb995b589bc29bff84a717e626970 *R/map.R
-7cae0dc21ed45d7f591d3c10ecb2142c *R/plot.kohonen.R
+e5c61eca77e3f34bb8fdd9fe89f5e6a2 *R/plot.kohonen.R
 78cef8390e703a4681bc27a8a8bb03a2 *R/predict.kohonen.R
 9685fed2072dbda758e8f60b52f47678 *R/som.R
 6b1eac8c50778b758a748956e2bd02e3 *R/summary.R
@@ -23,7 +23,7 @@ adaa12fd69373bd2d9d33901ca20bec7 *inst/doc/kohonen-manual.pdf
 b3ffacfdca82051984da5b18a31ffe27 *man/classvec2classmat.Rd
 1008de45fd631eefad1453b6f773005e *man/map.kohonen.Rd
 9bc2a11387c179b381da5f155ad2e137 *man/nir.Rd
-25c4f29bc249b66ce57f5eb460770b69 *man/plot.kohonen.Rd
+0c7ec8430c97f4efa7296c2948ba409a *man/plot.kohonen.Rd
 48a3caafa7dab8595a7e24dcb076bba3 *man/predict.kohonen.Rd
 054c86ea88aa220d6e751f7025510c05 *man/som.Rd
 659b515ede8a5c2bc0aef77d6e61c5d3 *man/summary.Rd
