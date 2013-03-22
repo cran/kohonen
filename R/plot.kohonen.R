@@ -1,4 +1,4 @@
-### $Id: plot.kohonen.R 16 2012-08-10 14:56:38Z ron.wehrens@gmail.com $
+### $Id: plot.kohonen.R 17 2013-03-15 09:53:40Z ron.wehrens@gmail.com $
 ### Version 2.0.5: added parameter heatkeywidth (suggestion by Henning
 ### Rust). Especially useful for multiple plots in one figure.
 
@@ -127,7 +127,6 @@ plot.kohmapping <- function(x, classif, main, labels, pchs, bgcol,
 
 
 ### Adapted for version 2.0: April 11.
-### Checked: nope
 
 plot.kohprop <- function(x, property, main, palette.name, ncolors,
                          zlim, heatkey, contin, keepMargins,

@@ -51,6 +51,9 @@ som(data, grid=somgrid(), rlen = 100, alpha = c(0.05, 0.01),
   \item{method}{the type of som, here "som".}
 }
 
+\references{
+  "Self-organizing maps", 3rd Ed., T. Kohonen, New York: Springer (2001) 
+}
 \author{Ron Wehrens}
 
 \seealso{\code{\link{xyf}}, \code{\link{bdk}}, \code{\link{plot.kohonen}}}

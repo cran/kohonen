@@ -30,8 +30,11 @@ supersom(data, grid=somgrid(), rlen = 100, alpha = c(0.05, 0.01),
     one only the winning unit will be updated. The default is to start with a
     value that covers 2/3 of all unit-to-unit distances.}
   \item{contin}{parameter indicating whether data are continuous or
-    categorical. The default is to check whether all row sums equal
-    1: in that case \code{contin} is \code{FALSE}.}
+    categorical, i.e. a logical vector. If only \code{TRUE} or
+    \code{FALSE} is given, this is taken to hold for all elements in
+    \code{data}. The default is to check whether row sums in the data
+    matrices are equal to 1: in that case the corresponding
+    \code{contin} element is \code{FALSE}.}
   \item{toroidal}{if TRUE, the edges of the map are joined. Note
     that in a hexagonal toroidal map, the number of rows must be even.}
   \item{n.hood}{the shape of the neighbourhood, either "circular" or

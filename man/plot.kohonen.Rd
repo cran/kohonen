@@ -52,7 +52,9 @@ add.cluster.boundaries(x, cluster, lwd = 5, ...)
     type.}
   \item{contin}{whether or not the data should be seen as discrete
     (i.e. classes) or continuous in nature. Only relevant for the colour
-    keys of plots of supervised networks.}
+    keys of plots of supervised networks. Note that this is different
+    from the \code{contin} argument in the \code{xyf}, \code{bdk} and
+    \code{supersom} functions.}
   \item{whatmap}{For \code{supersom} maps and a "codes" plot: what maps
     to show.}
   \item{codeRendering}{How to show the codes. Possible choices:

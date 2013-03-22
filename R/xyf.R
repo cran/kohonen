@@ -24,7 +24,8 @@
     }
   }
   ny <- ncol(YY)
-  contin <- any(abs(rowSums(YY) - 1) > 1e-8)
+  if (missing(contin))
+    contin <- any(abs(rowSums(YY) - 1) > 1e-8)
   
   ng <- nrow(grid$pts)
   xdists <- ydists <- rep(0, ng)  

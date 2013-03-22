@@ -73,8 +73,21 @@ Changes in version 2.0.10:
   - added an example for component planes (suggestion by Andreas Henelius)
   - fixed a bug concerning maxlegendcols (spotted by Andreas Henelius)
 
+Changes in version 2.0.11:
+  - parameter contin was effectively not used in functions xyf,
+    supersom and bdk (spotted by Andrey Ziyatdinov); now corrected
+  - in supersom the original code to estimate contin was giving
+    errors; now corrected
+  - removed a bug in assigning column names to the codebook vectors in
+    supersom
+  - added topographic error measures (proposed independently by John
+    Pearce and Marco Pomati)
+
+
+
 Wishlist:
   - more flexible definition of distances: should be user-definable
     for every data layer.
   - identify.kohonen function: should return unit numbers that are
     clicked whether or not a colour bar is present.
+  - support for multi-core training...

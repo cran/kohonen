@@ -35,17 +35,31 @@
   if (!is.list(data) | !all(sapply(data, is.matrix) | sapply(data, is.factor)))
     stop("data should be a list of data matrices or factors")
   if (any(sapply(data, is.factor))) {
-    data[sapply(data, is.factor)] <- lapply(data[sapply(data, is.factor)],
-                                            classvec2classmat)
+    data[sapply(data, is.factor)] <-
+      lapply(data[sapply(data, is.factor)], classvec2classmat)
   }
 
   if (!all(sapply(data, is.numeric)))
     stop("Argument data should be numeric")
 
-  contin <- rep(NA, length(orig.data))
-  names(contin) <- names(orig.data)
-  contin[whatmap] <- sapply(data, function(x) any(abs(rowSums(x) - 1) > 1e-8))
-
+  if (missing(contin)) {
+    ## contin == FALSE if this is a class label or membership
+    ## estimate; in that case variables can be interpreted as fractions,
+    ## i.e. they should not contain NAs and sum to 1
+    contin <- rep(NA, length(orig.data))
+    names(contin) <- names(orig.data)
+    contin[whatmap] <- sapply(data,
+                              function(x) {
+                                !any(is.na(x)) &&
+                                  any(abs(rowSums(x) - 1) > 1e-8)})
+  } else {
+    if (length(contin) == 1)
+      contin <- rep(contin, length(orig.data))
+    
+    if (length(contin) != length(orig.data))
+      stop("incorrect length of contin parameter")
+  }
+    
   ## remove NAs: individual NAs are allowed but rows or columns
   ## containing more than maxNA.fraction of NAs are removed. Columns
   ## are only removed in one data matrix.
@@ -76,8 +90,8 @@
     narows <- NULL
   }
 
-  for (i in 1:nmat)
-    dimnames(data[[i]]) <- NULL
+  ## for (i in 1:nmat)
+  ##   dimnames(data[[i]]) <- NULL
   nobjects <- unique(sapply(data, nrow))
   if (length(nobjects) > 1)
     stop("unequal numbers of objects in data list")
@@ -149,7 +163,7 @@
     if (is.factor(orig.data[[ whatmap[i] ]])) {
       colnames(codes[[ whatmap[i] ]]) <- levels(orig.data[[ whatmap[i] ]])
     } else {
-      colnames(codes[[ whatmap[i] ]]) <- colnames(orig.data[[ whatmap[i] ]])
+      colnames(codes[[ whatmap[i] ]]) <- colnames(data[[i]])
     } 
   }
   
