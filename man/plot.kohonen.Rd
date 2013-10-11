@@ -9,6 +9,7 @@
 \alias{plot.heatkey}
 \alias{plot.kohmapping}
 \alias{plot.kohUmatrix}
+\alias{identify.kohonen}
 \alias{add.cluster.boundaries}
 \title{Plot kohonen object}
 \description{
@@ -23,7 +24,8 @@
      zlim = NULL, heatkey = TRUE, property, contin,
      whatmap = NULL, codeRendering = NULL, keepMargins = FALSE,
      heatkeywidth = .2, \dots)
-add.cluster.boundaries(x, cluster, lwd = 5, ...)
+\method{identify}{kohonen}(x, \dots)
+add.cluster.boundaries(x, clustering, lwd = 5, ...)
 }
 \arguments{
   \item{x}{kohonen object.}
@@ -67,7 +69,7 @@ add.cluster.boundaries(x, cluster, lwd = 5, ...)
     work in most cases but in some cases, e.g. when plotting multiple
     figures, it may need to be adjusted.}
   \item{lwd, \dots}{other graphical parameters.}
-  \item{cluster}{cluster labels of the map units.}
+  \item{clustering}{cluster labels of the map units.}
 }
 \details{Several different types of plots are supported:
   \describe{
@@ -95,8 +97,15 @@ add.cluster.boundaries(x, cluster, lwd = 5, ...)
       distances, the better the objects are represented by the codebook
       vectors.}
   }
+  Function \code{identify.kohonen} shows the number of a unit that is
+  clicked on with the mouse. The tolerance is calculated from the ratio
+  of the plotting region and the user coordinates, so clicking at any
+  place within a unit should work.
+  
   Function \code{add.cluster.boundaries} will add to an existing plot of
-  a map thick lines, visualizing which units would be clustered together.
+  a map thick lines, visualizing which units would be clustered
+  together. In toroidal maps, boundaries at the edges will only be shown
+  on the top and right sides to avoid double boundaries.
 }
 
 \author{Ron Wehrens}

@@ -1,4 +1,4 @@
-### $Id: plot.kohonen.R 17 2013-03-15 09:53:40Z ron.wehrens@gmail.com $
+### $Id: plot.kohonen.R 21 2013-10-09 13:40:35Z ron.wehrens@gmail.com $
 ### Version 2.0.5: added parameter heatkeywidth (suggestion by Henning
 ### Rust). Especially useful for multiple plots in one figure.
 
@@ -174,11 +174,10 @@ plot.kohprop <- function(x, property, main, palette.name, ncolors,
           add = TRUE, fg = "black", bg = bgcolors)
 
   ## if contin, a pretty labelling of z colors will be used; if not,
-  ## all colours will have their own label. The latter only if the
-  ## number of categories is smaller than 10, unless explicitly
-  ## given.
+  ## all colours will have their own label. The latter only if 
+  ## property is a factor, unless explicitly given.
   if (missing(contin))
-    contin <- !(length(unique(property)) < 10)
+    contin <- !is.factor(property)
   
   if (heatkey) {
     if (length(unique(property)) < 10 & !contin) {
@@ -446,7 +445,7 @@ plot.kohcodes <- function(x, main, palette.name, bgcol, whatmap,
     par(mar = margins)
     
     if (codeRendering == "segments" & # we need space for the legend here...
-        nvars < 15 &
+        ##        nvars < 15 &
         !is.null(colnames(codes))) {
       plot(x$grid, 
            ylim = c(max(x$grid$pts[,2]) + min(x$grid$pts[,2]), -2))
@@ -589,93 +588,132 @@ plot.heatkey <- function (x, zlim, bgcol, labels, contin, heatkeywidth, ...)
 
 ### Show cluster boundaries additional to one of the map plots
 ### Additional arguments may be col. Based on code from Leo Lopes.
+### Oct 8 - rewritten the function:
+### * neighbours of different classes are much more easily found, and
+###   now are correct, too, also for toroidal maps (bug fix)
+### * additional lines on top of the map are drawn if necessary for
+###   toroidal maps (bug fix)
+### * in rectangular maps some superfluous lines are no longer drawn
+###   (purely esthetic improvement)
 
-add.cluster.boundaries <- function(x, cluster, lwd = 5, ...) {
-  nhbrdist <- unit.distances(x$grid, x$toroidal)
-  neighbours <- apply(nhbrdist, 1, function(y) which(y > .95 & y < 1.05))
-  ## which neighbours are in a different cluster?
-  neighbours.diffclass <-
-    lapply(1:length(neighbours),
-           function(i, y, class) y[[i]][(class[y[[i]]] != class[i])],
-           neighbours, cluster)
-  ## avoid counting differences twice
-  neighbours.diffclass2 <-
-    lapply(1:length(neighbours),
-           function(i, y) y[[i]][y[[i]] > i],
-           neighbours.diffclass)
-
-  ## Function to actually plot the boundaries. u1 always larger than
-  ## u2, so we only need to check E, NE and NW for hexagonal maps, and
-  ## E, NE, N and NW for rectangular maps
-  plot.boundary <- function(u1, u2, grid, lwd, ...) {
-    dloc <- grid$pts[u1,] - grid$pts[u2,]
+add.cluster.boundaries <- function(x, clustering, lwd = 5, ...)
+{
+  grd <- x$grid
+  if (x$toroidal) {
+    ydiff <- diff(grd$pts[1 + c(0, grd$xdim),2])
     
-    if (grid$topo == "hexagonal") {
-      angle <- 2 * pi/3                  ## NW
-      if (dloc[2] < .1) {                ## E
-        angle <- 0
-      } else {
-        if (dloc[1] > .1) angle <- pi/3  ## NE
-      }
+    botrow <- c(grd$xdim, 1:grd$xdim, 1)
+    toprow <- c(grd$xdim*grd$ydim,
+                grd$xdim*grd$ydim + 1 - (grd$xdim:1),
+                grd$xdim*grd$ydim - grd$xdim + 1)
+    rightcol <- (1:grd$ydim)*grd$xdim
+    leftcol <- (1:grd$ydim)*grd$xdim + 1 - grd$xdim
+    
+    newpts <- rbind(cbind(grd$pts[botrow, 1], max(grd$pts[,2]) + ydiff),
+                    cbind(grd$pts[toprow, 1], min(grd$pts[,2]) - ydiff),
+                    cbind(grd$pts[leftcol, 1] - 1, grd$pts[leftcol, 2]),
+                    cbind(grd$pts[rightcol, 1] + 1, grd$pts[rightcol,2]))
 
-      radius <- .5/cos(pi/6)             ## horizontal unit distance always 1
-      segments(grid$pts[u2,1]+radius*cos(angle-pi/6),
-               grid$pts[u2,2]+radius*sin(angle-pi/6), 
-               grid$pts[u2,1]+radius*cos(angle+pi/6),
-               grid$pts[u2,2]+radius*sin(angle+pi/6),
-               lwd = lwd, xpd = NA, ...)  
-    } else { ## "rectangular", slightly different use of angle here
-      angle <- 2                         ## NE
-      if (abs(dloc[1]) < .1) {
-        angle <- 3                       ## N
-      } else {
-        if (abs(dloc[2]) < .1) {
-          angle <- 1                     ## E
-        } else {
-          if (dloc[1] < 0) {
-            angle <- 4                   ## NW
-          }
-        }
-      }
+    grd$pts <- rbind(grd$pts, newpts)
+    ## for debugging:
+    ## par("xpd" = TRUE); text(grd$pts[,1], grd$pts[,2], 1:nrow(grd$pts))
 
-      boundary <- switch(angle,
-                         "1" = { ## E
-                           x0 <- x1 <- grid$pts[u2,1] + .5
-                           y0 <- grid$pts[u2,2] - .3
-                           y1 <- y0 + .6
-                           list(x0, y0, x1, y1)
-                         },
-                         "2" = { ## NE
-                           x0 <- c(grid$pts[u2,1] + .5, grid$pts[u2,1] + .3)
-                           x1 <- x0 + .2
-                           y0 <- c(grid$pts[u2,2] + .7, grid$pts[u2,2] + .5)
-                           y1 <- y0 - .2
-                           list(x0, y0, x1, y1)
-                         } ,
-                         "3" = { ## N
-                           y0 <- y1 <- grid$pts[u2,2] + .5
-                           x0 <- grid$pts[u2,1] - .3
-                           x1 <- x0 + .6
-                           list(x0, y0, x1, y1)
-                           },
-                         "4" = { ## NW
-                           x0 <- c(grid$pts[u2,1] - .7, grid$pts[u2,1] - .5)
-                           x1 <- x0 + .2
-                           y0 <- c(grid$pts[u2,2] + .5, grid$pts[u2,2] + .3)
-                           y1 <- y0 + .2
-                           list(x0, y0, x1, y1)
-                         })
-      ## Go!
-      segments(x0 = boundary[[1]], y0 = boundary[[2]],
-               x1 = boundary[[3]], y1 = boundary[[4]],
-               lwd = lwd, xpd = NA, ...)
-    }
+    cluster <- c(clustering, clustering[c(botrow, toprow, rightcol, leftcol)])
+  } else {
+    cluster <- clustering
   }
   
-  for (i in 1:length(neighbours)) {
-    if (length(neighbours.diffclass2[[i]]) > 0)
-      sapply(neighbours.diffclass2[[i]],
-             function(ii, j) plot.boundary(ii, j, x$grid, lwd = lwd, ...),
-             i)
+  nhbrdist <- unit.distances(grd, FALSE) ## new grd is treated as non-toroid
+  nhbrdist[col(nhbrdist) >= row(nhbrdist)] <- 2
+  neighbours <- which(nhbrdist > .95 & nhbrdist < 1.05, arr.ind = TRUE)
+
+  diffclass.idx <-
+      sapply(1:nrow(neighbours),
+             function(ii)
+             cluster[neighbours[ii, 1]] != cluster[neighbours[ii, 2]])
+  neighbours <- neighbours[diffclass.idx,]
+  ## final step: remove rows in neighbours that are completely outside the
+  ## original grid (only relevant for the toroidal case)
+  if (x$toroidal) {
+    idx <- apply(neighbours, 1, function(x) all(x > grd$xdim*grd$ydim))
+    neighbours <- neighbours[!idx,]
   }
+  
+  ## Function to actually plot the boundaries. We only need to check
+  ## E, NE and NW to avoid drawing double lines.
+  plot.hex.boundary <- function(nb, grd, lwd, ...) {
+    radius <- .5/cos(pi/6)             ## horizontal unit distance always 1
+    ##    browser()
+    for (i in 1:nrow(nb)) {
+      u1 <- nb[i,1]
+      u2 <- nb[i,2]
+      
+      dloc <- grd$pts[u1,] - grd$pts[u2,]
+      
+      angle <- 2 * pi/3                                 ## NW
+      if (abs(dloc[2]) < .1 & dloc[1] > .1) {           ## E
+        angle <- 0
+      } else {
+        if (dloc[1] > .1 & dloc[2] > .1)
+            angle <- pi/3                               ## NE
+      }
+
+      ## with a toroidal grid one can have a SE line that according to
+      ## the above rules will be drawn as a NW line - should not
+      ## happen. The same holds for a W border, that will be drawn as
+      ## a NW border.
+      if (dloc[2] > -.1 & dloc[1] > -.6) 
+          segments(grd$pts[u2,1]+radius*cos(angle-pi/6),
+                   grd$pts[u2,2]+radius*sin(angle-pi/6), 
+                   grd$pts[u2,1]+radius*cos(angle+pi/6),
+                   grd$pts[u2,2]+radius*sin(angle+pi/6),
+                   lwd = lwd, xpd = NA, ...)  
+    }
+  }
+
+  plot.rect.boundary <- function(nb, grd, ...) {
+    verticals <- which(apply(nb[,2:1],
+                             1,
+                             function(idx)
+                             diff(grd$pts[idx,1]) == 1 &
+                             diff(grd$pts[idx,2]) == 0))
+                       
+    for (i in verticals) {
+      segments(x0 = mean(grd$pts[nb[i,],1]),
+               y0 = grd$pts[nb[i,1],2] - .5,
+               x1 = mean(grd$pts[nb[i,],1]),
+               y1 = grd$pts[nb[i,1],2] + .5,
+               ...)
+    }
+
+    horizontals <- which(apply(nb[,2:1],
+                               1,
+                               function(idx)
+                               diff(grd$pts[idx,2]) == 1 &
+                               diff(grd$pts[idx,1]) == 0))
+    for (i in horizontals) {
+      segments(x0 = grd$pts[nb[i,1],1] - .5,
+               y0 = mean(grd$pts[nb[i,],2]),
+               x1 = grd$pts[nb[i,1],1] + .5,
+               y1 = mean(grd$pts[nb[i,],2]),
+               ...)
+    }
+
+  }
+
+  switch(grd$topo,
+         rectangular = 
+         plot.rect.boundary(neighbours, grd, lwd = lwd, ...),
+         plot.hex.boundary(neighbours, grd, lwd = lwd, ...))
+
+  invisible()
+}
+
+
+identify.kohonen <- function(x, ...) {
+  ## map units have a radius of 1, so this is the tolerance we would
+  ## like to have when pointing at map units
+  tol <- par("pin")[1] / diff(par("usr")[1:2])
+  identify(x$grid$pts[,1], x$grid$pts[,2], 1:nrow(x$grid$pts),
+           tolerance = tol, ...)
 }

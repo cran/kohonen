@@ -16,13 +16,14 @@
                 grid = somgrid(6, 6, "hexagonal"), rlen=500)
   plot(nirnet, "counts", main="Counts")
 
-  ## Focus on compound 2 (water): 
+  ## Focus on compound 2 (water):
+  dev.new(width = 14)
   par(mfrow = c(1,2))
   set.seed(13)
   nirnet <- xyf(data = nir$spectra[nir$training,],
                 Y = nir$composition[nir$training, 2],
                 grid = somgrid(6, 6, "hexagonal"), rlen=500)
-  water.xyf <- predict(nirnet)$unit.prediction
+  water.xyf <- predict(nirnet)$prediction
   plot(nirnet, "property", property = water.xyf,
        main="Prediction of water content")
   ## Plot temperatures as circles
@@ -31,14 +32,15 @@
 	  circles = (nir$temperature[nir$training] - 20)/250,
 	  inches = FALSE, add = TRUE)
 
-  ## Model temperatures	  
+  ## Model temperatures
   set.seed(13)
   nirnet2 <- xyf(data = nir$spectra[nir$training,],
-                 Y = classvec2classmat(nir$temperature[nir$training]),
+                 Y = nir$temperature[nir$training],
                  xweight=.25,
                  grid = somgrid(6, 6, "hexagonal"), rlen=500)
-  temp.xyf <- classmat2classvec(predict(nirnet2)$unit.prediction)
-  plot(nirnet2, "property", property = as.numeric(temp.xyf),
+  temp.xyf <- predict(nirnet2)$prediction
+
+  plot(nirnet2, "property", property = temp.xyf,
        palette.name = rainbow,
        main="Prediction of temperatures")
   ## Plot concentrations of water as circles

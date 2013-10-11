@@ -1,9 +1,6 @@
 ### Calculate distances in a Kohonen map. Crude and
 ### slow implementation, but hey.
 
-### Oct. 18: fixed bug - rectangular toroidal grid led to Euclidean
-### distances instead of maximum distances
-
 unit.distances <- function(grid, toroidal)
 {
   if (!toroidal) {

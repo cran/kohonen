@@ -18,25 +18,31 @@
     mapping <- map.kohonen(object, newdata, whatmap, weights)$unit.classif
   
   ## Find the value for each unit. For unsupervised maps, we should
-  ## have trainX and trainY values. Argument unit.predictions may
+  ## have trainX and trainY values. Argument unit.predictions will
   ## override the predictions per unit.
   if (is.null(unit.predictions)) {
     if (object$method %in% c("xyf", "bdk")) {
-      unit.predictions <- object$codes$Y
+      unit.predictions <- list(object$codes$Y)
       contin <- object$contin
+      factorY <- !contin
+      if (factorY)
+          factorY.levels <- list(colnames(object$codes$Y))
     } else {
       ## If whatmap is given, and not all layers used in training the map are
       ## included, the excluded layers are interpreted as being the ones
       ## for which a prediction is wanted. Unit.predictions are already
       ## available.
-      if (object$method == "supersom" &&
-          !is.null(whatmap)) {
+      if (object$method == "supersom" && !is.null(whatmap)) {
         whatmap <- check.whatmap(object, whatmap)
         
         trained.layers <- object$whatmap[!(object$whatmap %in% whatmap)]
         if (length(trained.layers) > 0) {
           unit.predictions <- object$codes[trained.layers]
           contin <- object$contin[trained.layers]
+          factorY <- !contin
+          if (any(factorY))
+              factorY.levels <-
+                  lapply(object$codes[trained.layers[factorY]], colnames)
         }
       }
 
@@ -47,9 +53,9 @@
           stop("For unsupervised forms of mapping, trainY is required")
         if (!is.list(trainY))
           trainY <- list(trainY)
-        
-        contin <- !(sapply(trainY, is.factor))
-        trainY[!contin] <- lapply(trainY[!contin], classvec2classmat)
+        factorY <- sapply(trainY, is.factor)
+        factorY.levels <- lapply(trainY[factorY], levels)
+        trainY[factorY] <- lapply(trainY[factorY], classvec2classmat)
 
         trainY[sapply(trainY, is.vector)] <-
           lapply(trainY[sapply(trainY, is.vector)], matrix, ncol = 1)
@@ -102,17 +108,18 @@
     }
   }
 
-  if (length(unit.predictions) == 1)
+  prediction <- lapply(unit.predictions, function(x) x[mapping,])
+  if (any(!contin))
+      prediction[!contin] <- lapply(prediction[!contin],
+                                    classmat2classvec, threshold = threshold)
+
+  for (fY in which(factorY))
+      prediction[[fY]] <- factor(prediction[[fY]],
+                                 levels = factorY.levels[[fY]])
+
+  if (length(prediction) == 1) {
     unit.predictions <- unit.predictions[[1]]
-  
-  if (is.list(unit.predictions)) { # supersom
-    prediction <- lapply(unit.predictions, function(x) x[mapping,])
-    prediction[!contin] <- lapply(prediction[!contin],
-                                  classmat2classvec, threshold = threshold)
-  } else {
-    prediction <- unit.predictions[mapping,]
-    if (!contin)
-      prediction <- classmat2classvec(prediction, threshold = threshold)
+    prediction <- prediction[[1]]
   }
   
   list(prediction = prediction, unit.classif = mapping,

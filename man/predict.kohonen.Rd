@@ -64,7 +64,6 @@ som.prediction <- predict(som.wines, newdata = Xtest,
 table(wine.classes[-training], som.prediction$prediction)
 
 ### more complicated examples
-\dontrun{
 data(yeast)
 
 ### only consider complete cases
@@ -85,19 +84,21 @@ yeast2.som <- som(yeast2$alpha[training,], somgrid(4, 6, "hexagonal"))
 yeast2.som.prediction <- predict(yeast2.som,
                                  newdata = yeast2$alpha[!training,],
                                  trainY = yeast2$class[training])
-predicted.classes <- yeast2.som.prediction$prediction
+table(yeast2$class[!training], yeast2.som.prediction$prediction)
 
-## supervised mapping (XYF)
+## supervised mapping (XYF) - trainY is no longer necessary
 yeast2.xyf <- xyf(yeast2$alpha[training,], yeast2$class[training],
                   somgrid(4, 6, "hexagonal"))
 yeast2.xyf.prediction <- predict(yeast2.xyf,
                                  newdata = yeast2$alpha[!training,])
+table(yeast2$class[!training], yeast2.xyf.prediction$prediction)
 
 ## supervised mapping (BDK)
 yeast2.bdk <- bdk(yeast2$alpha[training,], yeast2$class[training],
                   somgrid(4, 6, "hexagonal"))
 yeast2.bdk.prediction <- predict(yeast2.bdk,
                                  newdata = yeast2$alpha[!training,])
+table(yeast2$class[!training], yeast2.bdk.prediction$prediction)
 
 ## unsupervised mapping (supersom): prediction of data layer not used
 ## in training
@@ -108,9 +109,10 @@ yeast2.ssom.prediction <- predict(yeast2.ssom,
                                   newdata = lapply(yeast2,
                                     function(x) subset(x, !training)),
                                   trainY = list(class = yeast2$class[training]))
+table(yeast2$class[!training], yeast2.ssom.prediction$prediction)
 
 ## supervised mapping (supersom): prediction of a data layer that has
-## been used in training
+## been used in training - trainY is not necessary
 yeast2.ssom2 <- supersom(lapply(yeast2, function(x) subset(x, training)),
                          grid = somgrid(4, 6, "hexagonal"),
                          whatmap = c(1,3))
@@ -118,7 +120,6 @@ yeast2.ssom2.prediction <- predict(yeast2.ssom2,
                                    newdata = lapply(yeast2,
                                      function(x) subset(x, !training)),
                                    whatmap = 1)
-}
-
+table(yeast2$class[!training], yeast2.ssom2.prediction$prediction)
 }
 \keyword{classif}
