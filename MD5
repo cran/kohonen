@@ -1,12 +1,12 @@
-903c1e19a24efe5fe5ae4191de232ee8 *CHANGES
-dabbe97566cfaabf35f11e7c1f86de2e *DESCRIPTION
+976cae8e2ddd03dd2b52a73901c58e94 *CHANGES
+bbc1455950aeb5b8698901957a42ddea *DESCRIPTION
 9c45759409000a4097555af35a8ffe46 *NAMESPACE
 4f8dc45b25a895e8570aa2e3d615e5ba *R/bdk.R
 f8872ae6c6f57e47d1b1b626e621c25f *R/check.whatmap.R
 6cc0a5ca02ea151088c24bbf420ab060 *R/classvec2classmat.R
 c33fb995b589bc29bff84a717e626970 *R/map.R
-1ec27e411cb4004bed9906088dd644b3 *R/plot.kohonen.R
-e81ce11564786f80c6b752b7be7d55bc *R/predict.kohonen.R
+bac565cf58123910ea9529745fdf149d *R/plot.kohonen.R
+6405f64156c791e44cf786767a630c63 *R/predict.kohonen.R
 9685fed2072dbda758e8f60b52f47678 *R/som.R
 6b1eac8c50778b758a748956e2bd02e3 *R/summary.R
 103cc188e608e61d4e62c0cd81d7a892 *R/supersom.R
@@ -26,7 +26,7 @@ b3ffacfdca82051984da5b18a31ffe27 *man/classvec2classmat.Rd
 6a501b0f2c606191543842087acccea0 *man/nir.Rd
 473691527dafa29397e8e81bd2413001 *man/plot.kohonen.Rd
 cd347b884f66efa4f694342d8d388a8d *man/predict.kohonen.Rd
-70a2fa38fcb3424e3f9313b475ad4d10 *man/som.Rd
+1fb584434eac4a6fb56ab04e354eb978 *man/som.Rd
 659b515ede8a5c2bc0aef77d6e61c5d3 *man/summary.Rd
 ac2f86e824e8b43c14d77eedf73df946 *man/supersom.Rd
 994f5c58c92f95d23674d18e95f7450a *man/topo.error.Rd
