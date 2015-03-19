@@ -1,7 +1,7 @@
-364abda08bd1584857c02ac57cc71d38 *DESCRIPTION
-9c45759409000a4097555af35a8ffe46 *NAMESPACE
-6067ac529db215813f062ef043af70ff *NEWS
-4f8dc45b25a895e8570aa2e3d615e5ba *R/bdk.R
+dabb212d874335d081f9a462179cf334 *DESCRIPTION
+94d72e6bb10caa5be6286bc06d60947e *NAMESPACE
+83c43bd89401eb9f8fef11de503bd27a *NEWS
+084b270aba1778abef3fb805aa1fff69 *R/bdk.R
 f8872ae6c6f57e47d1b1b626e621c25f *R/check.whatmap.R
 6cc0a5ca02ea151088c24bbf420ab060 *R/classvec2classmat.R
 1ff41daac5c4303faba8642a3850c867 *R/map.R
@@ -13,7 +13,7 @@ bac565cf58123910ea9529745fdf149d *R/plot.kohonen.R
 361d1ffdd5ab2e73257cda8f65011228 *R/topo.R
 057b60649104727ab25910ee5dff4d0d *R/tricolor.R
 e1254217822c1ec4dc679fb1420aa80f *R/unit.distances.R
-d02f9ac8e118af7c8ef341e6008f2121 *R/xyf.R
+31515d3c5a2f1e883ee6d1aab8088f6d *R/xyf.R
 293ff4df72c12a037f55631c4430435e *data/nir.rda
 9529ee80f4a82a0f9c4c6061f5249574 *data/wines.rda
 819ff510b603f5e99e11f6165bfac4ff *data/yeast.rda
@@ -24,7 +24,7 @@ adaa12fd69373bd2d9d33901ca20bec7 *inst/doc/kohonen-manual.pdf
 b3ffacfdca82051984da5b18a31ffe27 *man/classvec2classmat.Rd
 1008de45fd631eefad1453b6f773005e *man/map.kohonen.Rd
 6a501b0f2c606191543842087acccea0 *man/nir.Rd
-473691527dafa29397e8e81bd2413001 *man/plot.kohonen.Rd
+4e867728488ee33999245c4e108a1eb5 *man/plot.kohonen.Rd
 cd347b884f66efa4f694342d8d388a8d *man/predict.kohonen.Rd
 1fb584434eac4a6fb56ab04e354eb978 *man/som.Rd
 659b515ede8a5c2bc0aef77d6e61c5d3 *man/summary.Rd
