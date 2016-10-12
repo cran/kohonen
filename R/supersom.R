@@ -146,7 +146,7 @@
             ncodes = as.integer(ng),
             rlen = as.integer(rlen),
             NAOK = TRUE,
-            PACKAGE = "kohonen")
+            PACKAGE = "itsakohonen")
 
   changes <- matrix(res$changes, ncol=nmat)
   colnames(changes) <- names(data)

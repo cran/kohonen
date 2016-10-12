@@ -10,7 +10,7 @@ S3method(summary, kohonen)
 S3method(identify, kohonen)
 S3method(map, kohonen)
 
-useDynLib(kohonen)
+useDynLib(itsakohonen)
 
 # Import all packages listed as Imports or Depends
 importFrom(class, somgrid)

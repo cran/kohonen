@@ -23,7 +23,7 @@ topo.error <- function(somobj, type = c("nodedist", "bmu"), data) {
                                    as.integer(nd),
                                    as.integer(np),
                                    dists = double(nd * ncodes),
-                                   NAOK = TRUE, PACKAGE = "kohonen")$dists
+                                   NAOK = TRUE, PACKAGE = "itsakohonen")$dists
                    
                    matrix(distances, nd, ncodes, byrow = TRUE)
                  })

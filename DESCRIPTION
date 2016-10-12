@@ -1,4 +1,4 @@
-Package: kohonen
+Package: itsakohonen
 Version: 2.0.19
 Title: Supervised and Unsupervised Self-Organising Maps
 Author: Ron Wehrens
@@ -10,3 +10,5 @@ NeedsCompilation: yes
 Packaged: 2015-09-03 15:08:36 UTC; ron
 Repository: CRAN
 Date/Publication: 2015-09-04 07:30:50
+LinkingTo: Rcpp
+Imports: Rcpp

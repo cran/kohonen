@@ -47,7 +47,7 @@
             p = as.integer(ncol(data)),
             ncodes = as.integer(nrow(init)),
             rlen = as.integer(rlen),
-            PACKAGE = "kohonen")
+            PACKAGE = "itsakohonen")
 
   changes <- matrix(res$changes, ncol=1)
   codes <- res$codes
