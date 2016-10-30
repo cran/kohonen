@@ -11,8 +11,8 @@
 /* Oct. 18 2007: copied the check for equality of distances from BDR's
    class library */
 
-void SOM_online(double *data, double *codes, double *nhbrdist,
-		double *alphas, double *radii, double *changes,
+void SOM_online(double *data, double *codes, double *code_snapshots, 
+    double *nhbrdist, double *alphas, double *radii, double *changes,
 		Sint *pn, Sint *pp, Sint *pncodes, Sint *prlen)
 {
   int n = *pn, p = *pp, ncodes = *pncodes, rlen = *prlen;
@@ -33,6 +33,12 @@ void SOM_online(double *data, double *codes, double *nhbrdist,
       dist = 0.0;
       for (j = 0; j < p; j++) {
 	tmp = data[i + j*n] - codes[cd + j*ncodes];
+    /**
+     * itsakettle understanding: So component 1 of all the codes
+     * are the first ncodes elements of codes, component 2 are the second ncode
+     * elements etc.
+     * E.g. as.double(matrix(c(1,2,3,4,5,6,7,8,9), byrow=TRUE, ncol=3))
+     */
 	dist += tmp * tmp;
       }
 
@@ -43,7 +49,7 @@ void SOM_online(double *data, double *codes, double *nhbrdist,
 	} else {
 	  if(++nind * UNIF < 1.0) nearest = cd;
 	}
-	dm = dist;
+	dm = dist; //itsakettle understanding: Updates min distance, loop on
       }
     }
 
@@ -52,6 +58,7 @@ void SOM_online(double *data, double *codes, double *nhbrdist,
     
     /* update all codes within threshold of 'nearest'. Linear decrease
        for both radius and learning parameter. */ 
+    //itsakettle understanding: k is the iteration we're on
     threshold = radii[0] - (radii[0] - radii[1]) * (double)k/(double)niter;
     if (threshold < 1.0) threshold = 0.5;
     alpha = alphas[0] - (alphas[0] - alphas[1]) * (double)k/(double)niter;
@@ -59,15 +66,18 @@ void SOM_online(double *data, double *codes, double *nhbrdist,
     l = (int)(k/n);
 
     for (cd = 0; cd < ncodes; cd++) {
-      if(nhbrdist[cd + ncodes*nearest] > threshold) continue;
-
-      for(j = 0; j < p; j++) {
-	tmp = data[i + j*n] - codes[cd + j*ncodes];
-	codes[cd + j*ncodes] += tmp * alpha;
-
-	if (cd == nearest) changes[l] += tmp * tmp;
+      //itsakettle understanding: updates the codes...
+      if(!(nhbrdist[cd + ncodes*nearest] > threshold)) {
+        for(j = 0; j < p; j++) {
+          tmp = data[i + j*n] - codes[cd + j*ncodes];
+          codes[cd + j*ncodes] += tmp * alpha;
+          
+          if (cd == nearest) changes[l] += tmp * tmp;
+        }
       }
-    }
+      for(j = 0; j < p; j++) {
+        code_snapshots[iter*ncodes*p + cd + j*ncodes] = codes[cd + j*ncodes];
+      }
   }
 
   for (l = 0; l < rlen; l++) {

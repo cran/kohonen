@@ -39,6 +39,7 @@
   res <- .C("SOM_online",
             data = as.double(data),
             codes = as.double(codes),
+            code_snapshots = as.double(rep(as.double(codes), rlen)),
             nhbrdist = as.double(nhbrdist),
             alpha = as.double(alpha),
             radii = as.double(radius),
@@ -51,6 +52,7 @@
 
   changes <- matrix(res$changes, ncol=1)
   codes <- res$codes
+  code_snapshots <- res$code_snapshots
   dim(codes) <- dim(init)
   colnames(codes) <- colnames(init)
 
@@ -61,11 +63,13 @@
                    changes = changes, alpha = alpha,
                    radius = radius, toroidal = toroidal,
                    unit.classif = mapping$unit.classif,
+                   code_snapshots=code_snapshots,
                    distances = mapping$distances, method="som"),
               class = "kohonen")
   } else {
     structure(list(grid = grid, codes = codes, changes = changes,
                    alpha = alpha, radius = radius,
+                   code_snapshots=code_snapshots,
                    toroidal = toroidal, method="som"),
               class = "kohonen")
   }
