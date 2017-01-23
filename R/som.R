@@ -35,11 +35,11 @@
     radius <- sort(radius * c(1, -1), decreasing = TRUE)
 
   changes <- rep(0, rlen)
-  
   res <- .C("SOM_online",
             data = as.double(data),
             codes = as.double(codes),
-            code_snapshots = as.double(rep(as.double(codes), rlen)),
+            code_snapshots = rep(as.double(codes), rlen*nrow(data)),
+            code_snapshot_datum =as.integer(rep(1, rlen*nrow(data))),
             nhbrdist = as.double(nhbrdist),
             alpha = as.double(alpha),
             radii = as.double(radius),
@@ -52,10 +52,16 @@
 
   changes <- matrix(res$changes, ncol=1)
   codes <- res$codes
-  code_snapshots <- res$code_snapshots
   dim(codes) <- dim(init)
   colnames(codes) <- colnames(init)
-
+  code_snapshots <- res$code_snapshots
+  # itsakettle, first c(codes matrix size, number of iter size) gives
+  # a matrix with columns of each code snapshot. Then 
+  # c(codes rows, codes col, number of iter size)
+  dim(code_snapshots) <- c(dim(init), rlen*nrow(data))
+  
+  code_snapshots_datum <- res$code_snapshot_datum + 1
+  
   if (keep.data) {
     mapping <- map.kohonen(list(codes = codes), newdata = data)
     
@@ -64,12 +70,14 @@
                    radius = radius, toroidal = toroidal,
                    unit.classif = mapping$unit.classif,
                    code_snapshots=code_snapshots,
+                   code_snapshots_datum=code_snapshots_datum,
                    distances = mapping$distances, method="som"),
               class = "kohonen")
   } else {
     structure(list(grid = grid, codes = codes, changes = changes,
                    alpha = alpha, radius = radius,
                    code_snapshots=code_snapshots,
+                   code_snapshots_datum=code_snapshots_datum,
                    toroidal = toroidal, method="som"),
               class = "kohonen")
   }

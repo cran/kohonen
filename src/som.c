@@ -12,8 +12,8 @@
    class library */
 
 void SOM_online(double *data, double *codes, double *code_snapshots, 
-    double *nhbrdist, double *alphas, double *radii, double *changes,
-		Sint *pn, Sint *pp, Sint *pncodes, Sint *prlen)
+    int *code_snapshot_datum, double *nhbrdist, double *alphas, double *radii, 
+    double *changes, Sint *pn, Sint *pp, Sint *pncodes, Sint *prlen)
 {
   int n = *pn, p = *pp, ncodes = *pncodes, rlen = *prlen;
   int cd, i, j, k, l, nearest, niter, nind;
@@ -76,8 +76,10 @@ void SOM_online(double *data, double *codes, double *code_snapshots,
         }
       }
       for(j = 0; j < p; j++) {
-        code_snapshots[iter*ncodes*p + cd + j*ncodes] = codes[cd + j*ncodes];
+        code_snapshots[k*ncodes*p + cd + j*ncodes] = codes[cd + j*ncodes];
       }
+    }
+    code_snapshot_datum[k] = i;
   }
 
   for (l = 0; l < rlen; l++) {
