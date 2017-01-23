@@ -77,7 +77,7 @@
               py = as.integer(ny),
               ncodes = as.integer(ng),
               rlen = as.integer(rlen),
-              PACKAGE = "kohonen")
+              PACKAGE = "itsakohonen")
   } else {
     res <- .C("BDK_Tani",
               data = as.double(data),
@@ -96,7 +96,7 @@
               py = as.integer(ny),
               ncodes = as.integer(ng),
               rlen = as.integer(rlen),
-              PACKAGE = "kohonen")
+              PACKAGE = "itsakohonen")
   }
   
   changes <- matrix(res$changes, ncol=2)

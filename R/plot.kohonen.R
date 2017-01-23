@@ -34,7 +34,7 @@
            palette.name = palette.name, ncolors = ncolors,
            zlim = zlim, heatkey = heatkey,
            contin = contin, keepMargins = keepMargins, 
-           heatkeywidth = heatkeywidth, ...),
+           heatkeywidth = heatkeywidth, arcs=NULL, ...),
          codes = plot.kohcodes(x = x, main = main,
            palette.name = palette.name, bgcol = bgcol,
            whatmap = whatmap, codeRendering = codeRendering,
@@ -130,11 +130,11 @@ plot.kohmapping <- function(x, classif, main, labels, pchs, bgcol,
 
 plot.kohprop <- function(x, property, main, palette.name, ncolors,
                          zlim, heatkey, contin, keepMargins,
-                         heatkeywidth, ...)
+                         heatkeywidth, arcs=NULL, ...)
 {
   if (is.null(main)) main <- "Property plot"
   if (is.null(palette.name)) palette.name <- heat.colors
-  
+
   margins <- rep(0.6, 4)
   if (heatkey) margins[2] <- margins[2] + 4
   if (main != "") margins[3] <- margins[3] + 2
@@ -145,6 +145,16 @@ plot.kohprop <- function(x, property, main, palette.name, ncolors,
   par(mar = margins)
   
   plot(x$grid, ...)
+  
+  if(!is.null(arcs)) {
+    # draw the arcs
+    segments(x0=x$grid$pts[arcs$from, 1],
+           y0=x$grid$pts[arcs$from, 2],
+           x1=x$grid$pts[arcs$to, 1],
+           y1=x$grid$pts[arcs$to, 2],
+           lwd=arcs$width) 
+  }
+  
   title.y <- max(x$grid$pts[,2]) + 1.2
   if (title.y > par("usr")[4] - .2){
     title(main)
@@ -169,8 +179,9 @@ plot.kohprop <- function(x, property, main, palette.name, ncolors,
                                include.lowest = TRUE))
   bgcolors[!is.na(showcolors)] <- bgcol[showcolors[!is.na(showcolors)]]
 
+  # itsakettle - used to be 0.5
   symbols(x$grid$pts[, 1], x$grid$pts[, 2],
-          circles = rep(0.5, nrow(x$grid$pts)), inches = FALSE,
+          circles = rep(0.35, nrow(x$grid$pts)), inches = FALSE,
           add = TRUE, fg = "black", bg = bgcolors)
 
   ## if contin, a pretty labelling of z colors will be used; if not,
@@ -297,6 +308,7 @@ plot.kohUmatrix <- function(x, classif, main, palette.name, ncolors,
 
   nhbrdist <- unit.distances(x$grid, x$toroidal)
   nhbrdist[nhbrdist > 1.05] <- NA
+  
   if (x$method == "som") {
     for (i in 2:nrow(nhbrdist)) {
       for (j in 1:(i - 1)) {
@@ -320,12 +332,22 @@ plot.kohUmatrix <- function(x, classif, main, palette.name, ncolors,
       }
     }
   }
-
+  # set all elements on and below diagonal to NA
+  nhbrdist.arcs <- as.numeric(nhbrdist)
+  nhbrdist.arcs[lower.tri(nhbrdist, diag=TRUE)] <- NA
+  nhbrdist.arcs.matrix <- matrix(nhbrdist.arcs,
+                                 nrow=dim(nhbrdist)[1],
+                                 ncol=dim(nhbrdist)[1])
+  arcs <- na.omit(melt(nhbrdist.arcs.matrix))
+  colnames(arcs) <- c('from', 'to', 'width')
+  arcs$width <- 6.3 - arcs$width/max(arcs$width)*6
   neigh.dists <- colSums(nhbrdist, na.rm = TRUE)
+  
   plot.kohprop(x, property = neigh.dists, main = main,
                palette.name = palette.name, ncolors = ncolors,
                zlim = zlim, heatkey = heatkey, contin = TRUE,
-               keepMargins = keepMargins, heatkeywidth = heatkeywidth, ...)
+               keepMargins = keepMargins, heatkeywidth = heatkeywidth, 
+               arcs=arcs, ...)
 
   invisible(neigh.dists)
 }
