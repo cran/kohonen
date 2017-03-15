@@ -124,10 +124,18 @@ Changes in version 2.0.19:
   - replaced MASS:::eqscplot simply by eqscplot
   - added imports from default packages to NAMESPACE file
 
-***********************************************************************
+Changes in version 2.0.20:
+  - added support for hexagonal and square units in plotting maps
+    (contribution by Romain Bossart)
 
-Wishlist:
-  - more flexible definition of distances: should be user-definable
-    for every data layer.
-  - revisit definition of Tanimoto distance.
-  - support for multi-core training.
+Changes in version 2.9.99 (beta version leading up to 3.0):
+  - som and xyf training methods are now considered to be special
+    cases of supersom
+  - C engine replaced by C++
+  - several new distance functions have been added, including the
+    possibility to provide user-defined distances (function pointers,
+    made possible by the Rcpp package)
+  - distances may now be defined per layer
+  - many performance improvements, in particular reducing memory
+  consumption
+  - much more consistent syntax for the predict function 

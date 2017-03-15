@@ -1,0 +1,97 @@
+---
+title: "Custom distance function"
+author: "Ron Wehrens and Johannes Kruisselbrink"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Custom distance function}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Cpp custom distance function
+
+The custom distance function can be specified as follows:
+
+```{r}
+code <- ' 
+  #include <Rcpp.h>
+  	     
+  typedef double (*DistanceFunctionPtr)(double *, double *, int, int);
+  
+  /*
+    * My own custom euclidean distance function.
+  */
+    double myDistanceFunction(double *data, double *codes, int n, int nNA) {
+      if (nNA == n) {
+        return NA_REAL;
+      }
+      double tmp, d = 0.0;
+      int i;
+      for (i = 0; i < n; i++) {
+        if (!std::isnan(data[i])) {
+          tmp = data[i] - codes[i];
+          d += tmp * tmp;
+        }
+      }
+      if (nNA > 0) {
+        d *= n / (n - nNA);
+      }
+      d = sqrt(d);
+      return d;
+    }
+  
+  /*
+    * This function creates the external pointer that can be passed to the Kohonen
+  * package.
+  */
+    // [[Rcpp::export]]
+  Rcpp::ExpressionVector createMyDistanceFunctionXPtr(int n = 1){
+    Rcpp::ExpressionVector distanceFunctions(n);
+    for (int i = 0; i < n; i++) {
+      distanceFunctions[i] = Rcpp::XPtr<DistanceFunctionPtr>(new DistanceFunctionPtr(myDistanceFunction));
+    }
+    return distanceFunctions;
+  }
+'
+```
+
+## Call kohonen supersom with the custom distance function
+
+```{r}
+library(Rcpp)
+library(kohonen)
+sourceCpp(code = code)
+data(yeast)
+whatmap <- 3:6
+distance.fcts <- createMyDistanceFunctionXPtr(length(yeast))
+supersom.yeast <- supersom(yeast,
+                           whatmap = whatmap,
+                           grid = somgrid(10, 10, "rectangular"),
+                           dist.fcts = "euclidean",
+			   maxNA.fraction = 0.5
+                  )
+```
+
+## Plot the results to convince the reader
+
+### Quality
+
+```{r, echo=FALSE}
+plot(supersom.yeast, type = "quality")
+```
+
+### Counts
+
+```{r, echo=FALSE}
+plot(supersom.yeast, type = "counts")
+```
+
+### Changes
+
+```{r, echo=FALSE}
+plot(supersom.yeast, type = "changes")
+```
