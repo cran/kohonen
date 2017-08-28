@@ -22,7 +22,7 @@ check.data <- function(data, maxNA.fraction) {
   nobjects <- unique(sapply(data, nrow))
   if (length(nobjects) > 1)
     stop("Unequal numbers of objects in data list")
-  
+
   data
 }
 
@@ -57,7 +57,12 @@ remove.data.na <- function(data, nachecks) {
     if (length(nacols[[i]]) > 0) 
       data[[i]] <- data[[i]][, -nacols[[i]], drop=FALSE]
   }
-  
+   
+  ## check to see if there are any empty data layers
+  ## because of the maxNA.fraction
+  if (0 %in% c(sapply(data, dim)))
+    stop("Empty data layer - check maxNA.fraction argument")
+
   data
 }
 

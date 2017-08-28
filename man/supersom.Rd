@@ -1,6 +1,7 @@
 \name{supersom}
 \alias{som}
 \alias{xyf}
+\alias{bdk}
 \alias{supersom}
 \title{Self- and super-organising maps}
 \description{
@@ -10,14 +11,14 @@
   weighted distance over all layers is calculated to determine the
   winning units during training.
   Functions \code{som} and \code{xyf} are simply wrappers for supersoms
-  with one and two layers, respectively.
+  with one and two layers, respectively. Function \code{bdk} is deprecated.
 }
 
 \usage{
 som(X, ...)
 xyf(X, Y, ...)
 supersom(data, grid=somgrid(), rlen = 100, alpha = c(0.05, 0.01),
-         radius = quantile(nhbrdist, 0.67), 
+         radius = quantile(nhbrdist, 2/3), 
          whatmap = NULL, user.weights = 1, maxNA.fraction = 0L,
          keep.data = TRUE, dist.fcts = NULL,
          mode = c("online", "batch", "pbatch"), cores = -1, init,
@@ -37,13 +38,19 @@ supersom(data, grid=somgrid(), rlen = 100, alpha = c(0.05, 0.01),
     over \code{rlen} updates. Not used for the batch algorithm.}
   \item{radius}{the radius of the neighbourhood, either given as a
     single number or a vector (start, stop). If it is given as a single
-    number the radius will run from the given number to the negative
-    value of that number; as soon as the neighbourhood gets smaller than
-    one only the winning unit will be updated. The default is to start with a
-    value that covers 2/3 of all unit-to-unit distances.}
+    number the radius will change linearly from \code{radius} to zero; as
+    soon as the neighbourhood gets smaller than one only the winning unit
+    will be updated. Note that the default before version 3.0 was to run
+    from \code{radius} to \code{-radius}. If nothing is supplied, the
+    default is to start with a value that covers 2/3 of all unit-to-unit
+    distances.} 
   \item{whatmap}{What data layers to use. If unspecified all layers are used.}
-  \item{user.weights}{the weights given to individual layers. The default is
-    to give all layers equal weight.}
+  \item{user.weights}{the weights given to individual layers. This can
+    be a single number (all layers have the same weight, the default), a
+    vector of the same length as the \code{whatmap} argument, or a vector
+    of the same length as the \code{data} argument. In xyf maps, this
+    argument provides the same functionality as the now-deprecated
+    \code{xweight} argument that was used prior to version 3.0.}
   \item{maxNA.fraction}{the maximal fraction of values that may be NA to
     prevent the row or column to be removed.}
   \item{keep.data}{if TRUE, return original data and mapping
@@ -101,9 +108,19 @@ supersom(data, grid=somgrid(), rlen = 100, alpha = c(0.05, 0.01),
   500 is used to calculate the mean distances in each data layer. If
   \code{normalizeDataLayers == FALSE} the user weights are applied
   directly to the data (\code{distance.weights} are set to 1).
+
+  Various definitions of the Tanimoto distance exist in the
+  literature. The implementation here returns (for two binary vectors of
+  length n) the fraction of cases in which the two vectors
+  disagree. This is basically the Hamming distance divided by n - the
+  incorrect naming is retained (for the moment) to guarantee backwards
+  compatibility. If the vectors are not binary, they will be
+  converted to binary strings (with 0.5 as the class boundary). This
+  measure should not be used when variables are outside the range [0-1];
+  a check is done to make sure this is the case.
 }
 \references{R. Wehrens and L.M.C. Buydens, J. Stat. Softw. 21 (5), 2007;
-R. Wehrens and J. Kruisselbrink, in preparation.}
+R. Wehrens and J. Kruisselbrink, submitted, 2017.}
 \author{Ron Wehrens and Johannes Kruisselbrink}
 
 \seealso{\code{somgrid}, \code{\link{plot.kohonen}},

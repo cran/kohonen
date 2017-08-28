@@ -2,7 +2,7 @@ supersom <- function(data,
                      grid = somgrid(),
                      rlen = 100,
                      alpha = c(0.05, 0.01),
-                     radius = quantile(nhbrdist, 0.67),
+                     radius = quantile(nhbrdist, 2/3),
                      whatmap = NULL,
                      user.weights = 1,
                      maxNA.fraction = 0L,
@@ -19,10 +19,11 @@ supersom <- function(data,
     data <- list(data)
   orig.data <- data
   nmat <- length(data)
-  
-  data <- check.data(data)
+
+  data <- check.data(data, maxNA.fraction = maxNA.fraction)
   nachecks <- check.data.na(data, maxNA.fraction = maxNA.fraction)
   data <- remove.data.na(data, nachecks)
+
   
   ## ##########################################################################
   ## Check radius update parameters
@@ -35,6 +36,7 @@ supersom <- function(data,
   whatmap <- check.whatmap(data, whatmap)
   nmap <- length(whatmap)
   data <- data[whatmap]
+
   nobjects <- nrow(data[[1]])
   nvar <- sapply(data, ncol)
   data.matrix <- matrix(unlist(data), ncol = nobjects, byrow = TRUE)
@@ -78,6 +80,15 @@ supersom <- function(data,
         } else {
           stop("Wrong number of distances defined")
         }}}}
+
+  ## check for data outside the range [0-1] for any layers (in
+  ## whatmap) using the tanimoto distance.
+  if (any(tanidists <- dist.fcts == "tanimoto")) {
+    minvals <- sapply(data[which(tanidists)], min, na.rm = TRUE)
+    maxvals <- sapply(data[which(tanidists)], max, na.rm = TRUE)
+    if (any(minvals < 0 | maxvals < 0))
+      stop("Layers for which the Tanimoto distance is used should have data within the [0,1] range") 
+  }
   
   dist.ptrs <- getDistancePointers(dist.fcts,
                                    maxNA.fraction = maxNA.fraction)
@@ -167,9 +178,14 @@ supersom <- function(data,
                                        maxNA.fraction = maxNA.fraction,
                                        dist.fcts = dist.fcts[ii]),
                                   type = "data"))
-      ## The distance weights are then the reciprocal values of the median
-      ## distances per layer
-      distance.weights[whatmap] <- 1 / sapply(meanDistances, median)
+
+      if (any(sapply(meanDistances, mean) < .Machine$double.eps))
+        stop("Non-informative layers present: mean distance between objects zero")
+      
+      ## The distance weights are then the reciprocal values of the mean
+      ## distances per layer. We no longer use median distances since
+      ## there is a real chance that for factor data the median equals zero
+      distance.weights[whatmap] <- 1 / sapply(meanDistances, mean)
     } else {
       distance.weights <- rep(1, length(data))
     }
@@ -232,6 +248,7 @@ supersom <- function(data,
   layerID <- rep(1:nmap, nvar)
   mycodes2 <- split(as.data.frame(mycodes), layerID)
   mycodes3 <- lapply(mycodes2, function(x) t(as.matrix(x)))
+
   codes <- vector(length(orig.data), mode = "list")
   names(codes) <- names(orig.data)
   codes[whatmap] <- mycodes3
