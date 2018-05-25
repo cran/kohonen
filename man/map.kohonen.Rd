@@ -7,12 +7,13 @@
 }
 \usage{
 \method{map}{kohonen}(x, newdata, whatmap = NULL, user.weights = NULL,
-                      maxNA.fraction = NULL, ...)
+                      maxNA.fraction = x$maxNA.fraction, ...)
 }
 \arguments{
   \item{x}{An object of class \code{kohonen}.}
   \item{newdata}{list of data matrices (numerical) of factors, equal to
-    the \code{data} argument of the \code{supersom} function.}
+    the \code{data} argument of the \code{supersom} function. No
+    \code{data.frame} objects are allowed.}
   \item{whatmap, user.weights, maxNA.fraction}{parameters that usually will
     be taken from the \code{x} object, but can be supplied by the user
     as well. Note that it is not possible to change distance functions

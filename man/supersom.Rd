@@ -26,9 +26,11 @@ supersom(data, grid=somgrid(), rlen = 100, alpha = c(0.05, 0.01),
 }
 
 \arguments{
-  \item{X, Y}{numerical data matrices, or factors.}
+  \item{X, Y}{numerical data matrices, or factors. No \code{data.frame}
+    objects are allowed - convert them to matrices first.}
   \item{data}{list of data matrices (numerical) of factors. If a vector
-    is entered, it will be converted to a one-column matrix.}
+    is entered, it will be converted to a one-column matrix. No
+    \code{data.frame} objectss are allowed.}
   \item{grid}{a grid for the codebook vectors:
     see \code{\link[class]{somgrid}}.}
   \item{rlen}{the number of times the complete data set will be
@@ -52,7 +54,7 @@ supersom(data, grid=somgrid(), rlen = 100, alpha = c(0.05, 0.01),
     argument provides the same functionality as the now-deprecated
     \code{xweight} argument that was used prior to version 3.0.}
   \item{maxNA.fraction}{the maximal fraction of values that may be NA to
-    prevent the row or column to be removed.}
+    prevent the row to be removed.}
   \item{keep.data}{if TRUE, return original data and mapping
     information. If FALSE, only return the trained map (in essence the
     codebook vectors).}

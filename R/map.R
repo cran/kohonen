@@ -7,15 +7,18 @@ map.kohonen <- function(x,
                         newdata,
                         whatmap = NULL,
                         user.weights = NULL,
-                        maxNA.fraction = NULL, ...)
+                        maxNA.fraction = x$maxNA.fraction, ...)
 {
   ## ##########################################################################
   ## Get relevant info from kohonen object
   codes <- x$codes
   nlayers <- length(codes)
   
-  if (missing(newdata) & !is.null(x$data)) newdata <- x$data
-  if (is.matrix(newdata)) newdata <- list(newdata) ## service to the user
+  if (missing(newdata) & !is.null(x$data)) {
+    newdata <- x$data
+  } else {
+    newdata <- check.data(newdata)
+  }
   
   if (is.null(user.weights)) {
     user.weights <- x$user.weights
@@ -25,17 +28,17 @@ map.kohonen <- function(x,
   }
   if (length(user.weights) == 1) user.weights <- rep(1, nlayers)
   if (is.null(whatmap)) whatmap <- x$whatmap
-  if (is.null(maxNA.fraction)) maxNA.fraction <- x$maxNA.fraction
-
-  dist.ptrs <- getDistancePointers(x$dist.fcts, maxNA.fraction = maxNA.fraction)
+ 
+  dist.ptrs <- getDistancePointers(x$dist.fcts,
+                                   maxNA.fraction = maxNA.fraction)
 
   ## ##########################################################################
   ## Check whatmap
   whatmap <- check.whatmap(newdata, whatmap)
 
   ## ##########################################################################
-  ## Check data and apply whatmap
-  newdata <- check.data(newdata[whatmap], maxNA.fraction = maxNA.fraction)
+  ## Apply whatmap.
+  newdata <- newdata[whatmap]
   nachecks <- check.data.na(newdata, maxNA.fraction = maxNA.fraction)
   newdata <- remove.data.na(newdata, nachecks)
             
@@ -78,10 +81,10 @@ map.kohonen <- function(x,
                  weights = weights,
                  distanceFunctions = dist.ptrs)
 
-  if (length(nachecks[[1]]) > 0) {
-    unit.classif <- distances <- rep(NA, nobjects + length(nachecks[[1]]))
-    unit.classif[ -nachecks[[1]] ] <-  res$winners + 1
-    distances[ -nachecks[[1]] ] <- res$unitdistances
+  if (length(nachecks) > 0) {
+    unit.classif <- distances <- rep(NA, nobjects + length(nachecks))
+    unit.classif[-nachecks] <-  res$winners + 1
+    distances[-nachecks] <- res$unitdistances
 
     list(unit.classif = unit.classif,
          distances = distances,

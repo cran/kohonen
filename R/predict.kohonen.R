@@ -6,12 +6,15 @@
 ## else check unit.predictions
 ## check newdata with unit.predictions
 ## map newdata
+
 predict.kohonen <- function(object,
                             newdata = NULL,
                             unit.predictions = NULL,
                             trainingdata = NULL,
                             whatmap = NULL,
-                            threshold = 0, ...)
+                            threshold = 0,
+                            maxNA.fraction = object$maxNA.fraction,
+                            ...)
 {
   codeNcols <- sapply(object$codes, ncol)
   ncodes <- nrow(object$codes[[object$whatmap[1]]])
@@ -31,26 +34,35 @@ predict.kohonen <- function(object,
         lapply(unit.predictions[isFactorPred], classvec2classmat)
   } else {
     ## calculate unit.predictions from mapping the trainingdata
-    if (is.null(trainingdata))
+    if (is.null(trainingdata)) {
       trainingdata <- object$data
-    
-    if (any(factorY <- sapply(trainingdata, is.factor)))
-      trainingdata[factorY] <- lapply(trainingdata[factorY], classvec2classmat)
+    } else {
+      if (is.null(trainingdata))
+        stop("Missing trainingdata argument, no data available in kohonen object either")
+      trainingdata <- check.data(trainingdata)
+    }
     
     whatmap.tr <- check.whatmap(trainingdata, whatmap)
     if (!all(whatmap.tr == whatmap))
       stop("Data layer mismatch between map and trainingdata")
+
+    ## remove only rows that contain too many NAs in the whatmap layers. 
+    narows <- check.data.na(trainingdata[whatmap], maxNA.fraction)
+    trainingdata <- remove.data.na(trainingdata, narows)
     
     if (any(is.null(object$codes[whatmap])))
-      stop("Attempt to map training data on the basis of unused data layers")
+      stop("Attempt to map training data on the basis of data layers not present in the SOM")
     
     if (!checkListVariables(trainingdata[whatmap], codeNcols[whatmap]))
       stop("Number of columns of trainingdata do not match ",
            "codebook vectors")
-  
-    
-    mappingX <- map(object, trainingdata, whatmap, ...)$unit.classif
 
+    object$data <- trainingdata  # saves a check in map.kohonen
+    mappingX <- map(object,
+                    whatmap = whatmap,
+                    maxNA.fraction = maxNA.fraction,
+                    ...)$unit.classif
+    
     ## now calculate unit averages for ALL layers in the training data
     unit.predictions.tmp <-
       lapply(trainingdata,
@@ -77,14 +89,20 @@ predict.kohonen <- function(object,
     newdata <- object$data
     if (is.null(newdata))
       stop("Missing newdata argument, no data available in kohonen object either")
+    
+    newrownames <- rownames(newdata[[1]])
+    if (is.null(newrownames)) newrownames <- 1:nrow(newdata[[1]])
+    nnewrows <- length(newrownames)
+
     newmapping <- object$unit.classif
 
     if (any(factorNew <- sapply(newdata, is.factor)))
       newdata[factorNew] <- lapply(newdata[factorNew], classvec2classmat)
   } else {
-    if (is.matrix(newdata)) newdata <- list(newdata)
-    ## check data layers for newdata. Data layers of newdata may be a
-    ## subset of whatmap, but only it the names agree.
+    newdata <- check.data(newdata)
+
+    ## Data layers of newdata may be a subset of whatmap, but only it
+    ## the names agree.
     if (is.null(newnames <- names(newdata))) {
       whatmap.new <- whatmap
     } else {
@@ -98,26 +116,39 @@ predict.kohonen <- function(object,
     ## assume the layers are in the same order.
     if (!checkListVariables(newdata[whatmap.new], codeNcols[whatmap.new]))
       stop("Number of columns of newdata do not match codebook vectors")
-    
-    if (any(factorNew <- sapply(newdata, is.factor)))
-      newdata[factorNew] <- lapply(newdata[factorNew], classvec2classmat)
 
+    ## check all layers but only remove records from whatmap layers
+
+    newrownames <- rownames(newdata[[1]])
+    if (is.null(newrownames)) newrownames <- 1:nrow(newdata[[1]])
+    nnewrows <- length(newrownames)
+
+    narows <- check.data.na(newdata[whatmap.new],
+                            maxNA.fraction = maxNA.fraction)
+    newdata <- remove.data.na(newdata, narows)
+    
     ## finally: calculate mapping of new data
     newmapping <- map(object,
                       newdata = newdata,
-                      whatmap = whatmap.new, ...)$unit.classif
+                      whatmap = whatmap.new,
+                      ...)$unit.classif
   }
-  
-  nonNA <- which(!is.na(newmapping))
+
+  if (length(narows) > 0) {
+    rowidx <- (1:nnewrows)[-narows]
+  } else {
+    rowidx <- 1:nnewrows
+  }
+  nonNA <- rowidx[which(!is.na(newmapping))]
   predictions <- lapply(unit.predictions,
                         function(x) {
-                          pred <- matrix(NA, length(newmapping), ncol(x))
+                          pred <- matrix(NA, nnewrows, ncol(x))
                           pred[nonNA,] <-
                             x[newmapping[nonNA],,drop=FALSE]
                           pred
                           })
   for (i in seq(along = predictions))
-    dimnames(predictions[[i]]) <- list(rownames(newdata[[1]]),
+    dimnames(predictions[[i]]) <- list(newrownames,
                                        colnames(unit.predictions[[i]]))
 
   ## codebooks are always matrices, also when they really signify
