@@ -1,6 +1,6 @@
-b7f39937695e70c0ec86c0e563664df9 *DESCRIPTION
+55f178fcc98a1066504921bc6f91c08b *DESCRIPTION
 faeef75139a3f05f9e907412234dbba0 *NAMESPACE
-675973742dc65eead3c3c567a73995b4 *NEWS
+88948721f72449e3602d916e3fee2550 *NEWS
 5cb058ed61811dda3682ef8b20a69a44 *R/RcppExports.R
 a7741227ad3ace00e7c19a96583b7504 *R/check.data.R
 5340ee88c9e2e30f47dfcb0555d3fa26 *R/check.whatmap.R
@@ -19,7 +19,7 @@ c00fe23325cef03a8c75d5a9840a75d8 *R/som.R
 057b60649104727ab25910ee5dff4d0d *R/tricolor.R
 a5607a58a29d585009e50eb68abadf64 *R/unit.distances.R
 82a1265dd875b11f3c4fbfa1d0282dbf *R/xyf.R
-686b1ea51370c3e9f1b56dd83758b097 *build/partial.rdb
+4891ab419b88a2b5cf382658c4aac20e *build/partial.rdb
 b5e3e9ed5309a06eed86acbfdddfb5d1 *data/datalist
 af41548056b616fabb7c46aa5bd5045d *data/degelder.rda
 67094ceb2dc39ecbd36f1fb09cae08ff *data/nir.rda
@@ -57,7 +57,7 @@ ad838f45c3a9435e7b2229b8cc6682ae *man/yeast.Rd
 e2d347f9ad519d45dd6bcf3703472671 *src/Makevars
 fca4afd0d08efc311f952d27bbae2783 *src/RcppExports.cpp
 0b0c395e4a39ef2e6b31d2459c449912 *src/batch-supersom.cpp
-e33e3762374a4008de3a6535da7ac930 *src/distance-functions.cpp
+becd969351e5a0fd4809cd60eeab5593 *src/distance-functions.cpp
 44821c52c79eb0ee5f5dbd49418da3da *src/distance-functions.h
 11fd26d00e09bdb2b9586d3b7866cc76 *src/kohonen.h
 ab641566e4b353cf7e30082dad71e5df *src/kohonen_types.h
