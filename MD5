@@ -1,4 +1,4 @@
-16458e112f10b65be7549911ca8d4157 *DESCRIPTION
+30c5f1e120c284e975fbc0c26d4b3475 *DESCRIPTION
 1e9b117d77b50e58fde065383626d6a9 *NAMESPACE
 303fad10c9fb366fb5362965e7d5ae53 *NEWS
 c67a7bb10d01cb052b1b01375928e160 *R/RcppExports.R
@@ -10,7 +10,7 @@ e567052a355e0cff7b6a049753210cfb *R/getCodes.R
 1999d014a246bae05a5511e35b69a374 *R/getDistancePointers.R
 f751e8b433dfbe6ddc685628d1929a92 *R/map.R
 2e4b6265a6cfcfe198b2e7e0963578b3 *R/object.distances.R
-b58bacc98b73b858713b2c42ee863d64 *R/plot.kohonen.R
+73925d034e5822953156b978814a1696 *R/plot.kohonen.R
 779d9b91120641ec58e498cdbba96ca2 *R/predict.kohonen.R
 f8e19bc3b0ff882af71f3c179ee3ee21 *R/som.R
 eab38917cc0eb8d5f60cf7a6cbe4f730 *R/somgrid.R
@@ -19,7 +19,7 @@ eab38917cc0eb8d5f60cf7a6cbe4f730 *R/somgrid.R
 057b60649104727ab25910ee5dff4d0d *R/tricolor.R
 a5607a58a29d585009e50eb68abadf64 *R/unit.distances.R
 82a1265dd875b11f3c4fbfa1d0282dbf *R/xyf.R
-7a545b6c558409388b3b4df51a225cd8 *build/partial.rdb
+774644e47fb9c4f752f774e59c30a239 *build/partial.rdb
 b5e3e9ed5309a06eed86acbfdddfb5d1 *data/datalist
 af41548056b616fabb7c46aa5bd5045d *data/degelder.rda
 67094ceb2dc39ecbd36f1fb09cae08ff *data/nir.rda
